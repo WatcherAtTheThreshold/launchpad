@@ -150,8 +150,8 @@ main {
 /* Primary and Business sections */
 .section[data-category="primary"],
 .section[data-category="business"] {
-  margin-left: 6rem;
-  margin-right: 6rem;
+  margin-left: 7rem;
+  margin-right: 7rem;
 }
 
 .section[data-category="primary"] .card-grid,
