@@ -164,7 +164,7 @@ function render(filter = "") {
 
       return `
         <a href="${app.url}" target="_blank" rel="noopener" class="card${hasPrev ? ' has-preview' : ''}">
-          ${hasPrev ? `<img class="card-preview" src="${app.image}" alt="${app.name}" loading="lazy">` : ""}
+          ${hasPrev ? `<div class="card-preview-wrap"><img class="card-preview" src="${app.image}" alt="${app.name}" loading="lazy"></div>` : ""}
           ${iconHTML}
           ${!hasPrev ? sigilHTML : ""}
           <span class="card-name">${app.name}</span>
