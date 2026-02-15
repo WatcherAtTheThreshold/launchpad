@@ -149,8 +149,8 @@ main {
 
 /* Games section gets narrower margins for more cards per row */
 .section[data-category="games"] {
-  margin-left: 5rem;
-  margin-right: 5rem;
+  margin-left: 5rem !important;
+  margin-right: 5rem !important;
 }
 
 /* Primary and Business sections get wider cards */
