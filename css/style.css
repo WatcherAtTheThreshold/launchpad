@@ -147,7 +147,13 @@ main {
   justify-content: center;
 }
 
-/* Primary and Business sections get wider cards */
+/* Primary and Business sections */
+.section[data-category="primary"],
+.section[data-category="business"] {
+  margin-left: 6rem;
+  margin-right: 6rem;
+}
+
 .section[data-category="primary"] .card-grid,
 .section[data-category="business"] .card-grid {
   grid-template-columns: repeat(auto-fit, 240px);
