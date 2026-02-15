@@ -206,3 +206,193 @@ document.addEventListener("keydown", (e) => {
 // ── Initial render ──
 
 render();
+
+// ── Music Player ──
+
+(function () {
+  const MUSIC_PATH = "audio/music/";
+  const FADE_MS = 2000;
+  const CROSSFADE_MS = 3000;
+  const CROSSFADE_OFFSET = 3; // seconds before end to start crossfade
+
+  const toggleBtn = document.getElementById("player-toggle");
+  const trackLabel = document.getElementById("player-track");
+  const volumeSlider = document.getElementById("player-volume");
+
+  let tracks = [];
+  let trackIndex = 0;
+  let isPlaying = false;
+  let masterVolume = parseFloat(localStorage.getItem("lp-volume") || "0.5");
+  let audioA = new Audio();
+  let audioB = new Audio();
+  let activeAudio = audioA;
+  let nextAudio = audioB;
+  let fadeRAF = null;
+  let crossfading = false;
+
+  volumeSlider.value = masterVolume;
+
+  // Shuffle array in place
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  // Format filename for display
+  function displayName(filename) {
+    return filename.replace(/\.mp3$/i, "").replace(/-/g, " ");
+  }
+
+  // Set volume on an audio element, clamped
+  function setVol(audio, v) {
+    audio.volume = Math.max(0, Math.min(1, v));
+  }
+
+  // Fade an audio element's volume from start to end over duration ms
+  function fade(audio, from, to, duration, onDone) {
+    const startTime = performance.now();
+    setVol(audio, from);
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      setVol(audio, from + (to - from) * t);
+      if (t < 1) {
+        fadeRAF = requestAnimationFrame(step);
+      } else {
+        if (onDone) onDone();
+      }
+    }
+    fadeRAF = requestAnimationFrame(step);
+  }
+
+  // Load a track into an audio element
+  function loadTrack(audio, index) {
+    audio.src = MUSIC_PATH + tracks[index];
+    audio.load();
+  }
+
+  // Advance to next track index (wraps)
+  function nextIndex() {
+    return (trackIndex + 1) % tracks.length;
+  }
+
+  // Update the track name display
+  function updateLabel() {
+    trackLabel.textContent = displayName(tracks[trackIndex]);
+  }
+
+  // Start crossfade near end of current track
+  function onTimeUpdate() {
+    if (crossfading) return;
+    const remaining = activeAudio.duration - activeAudio.currentTime;
+    if (remaining <= CROSSFADE_OFFSET && remaining > 0 && tracks.length > 1) {
+      crossfading = true;
+      const ni = nextIndex();
+      loadTrack(nextAudio, ni);
+      setVol(nextAudio, 0);
+      nextAudio.play().catch(() => {});
+
+      // Fade out active, fade in next
+      const startTime = performance.now();
+      const fromVol = activeAudio.volume;
+
+      function crossStep(now) {
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / CROSSFADE_MS, 1);
+        setVol(activeAudio, fromVol * (1 - t));
+        setVol(nextAudio, masterVolume * t);
+        if (t < 1) {
+          fadeRAF = requestAnimationFrame(crossStep);
+        } else {
+          activeAudio.pause();
+          activeAudio.removeEventListener("timeupdate", onTimeUpdate);
+          // Swap
+          const temp = activeAudio;
+          activeAudio = nextAudio;
+          nextAudio = temp;
+          trackIndex = ni;
+          updateLabel();
+          crossfading = false;
+          activeAudio.addEventListener("timeupdate", onTimeUpdate);
+        }
+      }
+      fadeRAF = requestAnimationFrame(crossStep);
+    }
+  }
+
+  // Handle track ending naturally (fallback if crossfade didn't trigger)
+  function onEnded() {
+    activeAudio.removeEventListener("timeupdate", onTimeUpdate);
+    crossfading = false;
+    trackIndex = nextIndex();
+    loadTrack(activeAudio, trackIndex);
+    updateLabel();
+    setVol(activeAudio, 0);
+    activeAudio.play().catch(() => {});
+    fade(activeAudio, 0, masterVolume, FADE_MS);
+    activeAudio.addEventListener("timeupdate", onTimeUpdate);
+  }
+
+  // Play
+  function play() {
+    isPlaying = true;
+    toggleBtn.innerHTML = "&#9646;&#9646;"; // pause icon
+    toggleBtn.title = "Pause music";
+    updateLabel();
+    setVol(activeAudio, 0);
+    activeAudio.play().catch(() => {});
+    if (fadeRAF) cancelAnimationFrame(fadeRAF);
+    fade(activeAudio, 0, masterVolume, FADE_MS);
+    activeAudio.addEventListener("timeupdate", onTimeUpdate);
+    activeAudio.addEventListener("ended", onEnded);
+  }
+
+  // Pause with fade out
+  function pause() {
+    isPlaying = false;
+    toggleBtn.innerHTML = "&#9654;"; // play icon
+    toggleBtn.title = "Play music";
+    if (fadeRAF) cancelAnimationFrame(fadeRAF);
+    const currentVol = activeAudio.volume;
+    fade(activeAudio, currentVol, 0, 1000, () => {
+      activeAudio.pause();
+      activeAudio.removeEventListener("timeupdate", onTimeUpdate);
+    });
+  }
+
+  // Toggle
+  toggleBtn.addEventListener("click", () => {
+    if (!tracks.length) return;
+    if (isPlaying) {
+      pause();
+    } else {
+      play();
+    }
+  });
+
+  // Volume slider
+  volumeSlider.addEventListener("input", () => {
+    masterVolume = parseFloat(volumeSlider.value);
+    localStorage.setItem("lp-volume", masterVolume);
+    if (isPlaying && !crossfading) {
+      setVol(activeAudio, masterVolume);
+    }
+  });
+
+  // Load tracks
+  fetch(MUSIC_PATH + "tracks.json")
+    .then(r => r.json())
+    .then(list => {
+      tracks = shuffle(list);
+      trackIndex = 0;
+      loadTrack(activeAudio, trackIndex);
+      updateLabel();
+    })
+    .catch(() => {
+      trackLabel.textContent = "No tracks found";
+    });
+})();
