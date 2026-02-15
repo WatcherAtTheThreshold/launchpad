@@ -156,20 +156,15 @@ function render(filter = "") {
     const cards = visible.map(app => {
       const hasPrev = !!app.image;
       const sigilHTML = app.sigil
-        ? hasPrev
-          ? `<img class="card-sigil card-sigil-badge" src="${app.sigil}" alt="" loading="lazy">`
-          : `<img class="card-sigil card-sigil-icon" src="${app.sigil}" alt="" loading="lazy">`
+        ? `<img class="card-sigil card-sigil-badge" src="${app.sigil}" alt="" loading="lazy">`
         : "";
-      const iconHTML = !hasPrev && !app.sigil ? `<span class="card-icon">${app.icon}</span>` : "";
 
       return `
         <a href="${app.url}" target="_blank" rel="noopener" class="card${hasPrev ? ' has-preview' : ''}">
           ${hasPrev ? `<div class="card-preview-wrap"><img class="card-preview" src="${app.image}" alt="${app.name}" loading="lazy"></div>` : ""}
-          ${iconHTML}
-          ${!hasPrev ? sigilHTML : ""}
           <span class="card-name">${app.name}</span>
           ${app.desc ? `<span class="card-desc">${app.desc}</span>` : ""}
-          ${hasPrev ? sigilHTML : ""}
+          ${sigilHTML}
         </a>
       `;
     }).join("");

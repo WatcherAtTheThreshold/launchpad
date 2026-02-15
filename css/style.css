@@ -138,6 +138,7 @@ main {
 /* ── Cards ── */
 
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -203,7 +204,6 @@ main {
 }
 
 .card.has-preview {
-  position: relative;
   padding-top: 1rem;
 }
 
@@ -222,14 +222,7 @@ main {
   opacity: 0.65;
 }
 
-/* Game cards: sigil replaces emoji, same size as emoji was */
-.card-sigil-icon {
-  width: 2.4rem;
-  height: 2.4rem;
-  object-fit: contain;
-}
-
-/* Primary/Business cards: sigil badge in lower right */
+/* Sigil badge in lower right */
 .card-sigil-badge {
   position: absolute;
   bottom: 0.75rem;
