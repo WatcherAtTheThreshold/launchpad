@@ -139,7 +139,7 @@ main {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-columns: repeat(auto-fit, 200px);
   gap: 1rem;
   justify-content: center;
 }
@@ -147,7 +147,7 @@ main {
 /* Primary and Business sections get wider cards */
 .section[data-category="primary"] .card-grid,
 .section[data-category="business"] .card-grid {
-  grid-template-columns: repeat(auto-fill, 240px);
+  grid-template-columns: repeat(auto-fit, 240px);
 }
 
 /* ── Cards ── */
