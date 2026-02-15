@@ -109,7 +109,7 @@ main {
 
 .section {
   margin-bottom: 2rem;
-  padding: 1.25rem 1.25rem 1.5rem;
+  padding: 1.25rem 2.5rem 1.5rem;
   background: rgba(22, 27, 40, 0.5);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -140,7 +140,7 @@ main {
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, 200px);
-  gap: 1.5rem;
+  gap: 2rem;
   justify-content: center;
 }
 
