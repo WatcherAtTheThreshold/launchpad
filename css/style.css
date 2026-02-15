@@ -139,14 +139,15 @@ main {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, 200px);
   gap: 1rem;
+  justify-content: center;
 }
 
 /* Primary and Business sections get wider cards */
 .section[data-category="primary"] .card-grid,
 .section[data-category="business"] .card-grid {
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, 240px);
 }
 
 /* ── Cards ── */
@@ -385,10 +386,7 @@ main {
     font-size: 2.2rem;
   }
 
-  .card-grid {
-    grid-template-columns: 1fr;
-  }
-
+  .card-grid,
   .section[data-category="primary"] .card-grid,
   .section[data-category="business"] .card-grid {
     grid-template-columns: 1fr;
