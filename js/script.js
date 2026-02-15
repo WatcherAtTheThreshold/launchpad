@@ -178,30 +178,25 @@ function render(filter = "") {
   }).join("");
 }
 
-// ── Search ──
+// ── Search (disabled — restore when project list grows) ──
 
-const searchInput = document.getElementById("search");
-
-searchInput.addEventListener("input", () => {
-  render(searchInput.value);
-});
-
-// ── Keyboard shortcuts ──
-
-document.addEventListener("keydown", (e) => {
-  // "/" focuses search (unless already in an input)
-  if (e.key === "/" && document.activeElement !== searchInput) {
-    e.preventDefault();
-    searchInput.focus();
-  }
-
-  // Escape clears and blurs search
-  if (e.key === "Escape") {
-    searchInput.value = "";
-    searchInput.blur();
-    render();
-  }
-});
+// const searchInput = document.getElementById("search");
+//
+// searchInput.addEventListener("input", () => {
+//   render(searchInput.value);
+// });
+//
+// document.addEventListener("keydown", (e) => {
+//   if (e.key === "/" && document.activeElement !== searchInput) {
+//     e.preventDefault();
+//     searchInput.focus();
+//   }
+//   if (e.key === "Escape") {
+//     searchInput.value = "";
+//     searchInput.blur();
+//     render();
+//   }
+// });
 
 // ── Initial render ──
 
