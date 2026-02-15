@@ -6,7 +6,8 @@ const APPS = [
     icon: "\u270D\uFE0F",
     category: "primary",
     desc: "Writing tools and workbench",
-    image: "images/writers-workbench.png"
+    image: "images/writers-workbench.png",
+    sigil: "images/sigils/writer-workbench-sigil.png"
   },
  
   {
@@ -15,7 +16,8 @@ const APPS = [
     icon: "\uD83D\uDCDD",
     category: "primary",
     desc: "Markdown editing tool",
-    image: "images/markdown-editor.png"
+    image: "images/markdown-editor.png",
+    sigil: "images/sigils/markdown-editor-sigil.png"
   },
   // ── Business ──
   {
@@ -24,7 +26,8 @@ const APPS = [
     icon: "\uD83D\uDDA8\uFE0F",
     category: "business",
     desc: "Print media site",
-    image: "images/fairweather-print-media.png"
+    image: "images/fairweather-print-media.png",
+    sigil: "images/sigils/fairweather-print-media-sigil.png"
   },
   {
     name: "Fairweather Productions",
@@ -32,7 +35,8 @@ const APPS = [
     icon: "\uD83C\uDFAC",
     category: "business",
     desc: "Production site",
-    image: "images/fairweather-productions.png"
+    image: "images/fairweather-productions.png",
+    sigil: "images/sigils/fairweather-productions-sigil.png"
   },
   {
     name: "GitHub",
@@ -40,7 +44,8 @@ const APPS = [
     icon: "\uD83D\uDC19",
     category: "business",
     desc: "GitHub dashboard",
-    image: "images/github.png"
+    image: "images/github.png",
+    sigil: "images/sigils/github-sigil.png"
   },
   {
     name: "Google Docs",
@@ -48,7 +53,8 @@ const APPS = [
     icon: "\uD83D\uDCC4",
     category: "business",
     desc: "Google Docs home",
-    image: "images/google-docs.png"
+    image: "images/google-docs.png",
+    sigil: "images/sigils/google-docs-sigil.png"
   },
   {
     name: "Sheet to MIDI",
@@ -56,7 +62,8 @@ const APPS = [
     icon: "\uD83C\uDFBC",
     category: "primary",
     desc: "Sheet music to MIDI converter",
-    image: "images/sheet-to-midi.png"
+    image: "images/sheet-to-midi.png",
+    sigil: "images/sigils/sheet-to-midi-sigil.png"
   },
  
    {
@@ -65,7 +72,8 @@ const APPS = [
     icon: "\uD83D\uDCCB",
     category: "primary",
     desc: "Productivity dashboard",
-    image: "images/everything-planner.png"
+    image: "images/everything-planner.png",
+    sigil: "images/sigils/everything-planner-sigil.png"
   },
 
   // ── Sites ──
@@ -79,28 +87,32 @@ const APPS = [
     url: "https://watcheratthethreshold.github.io/chronicles/",
     icon: "\uD83D\uDCDC",
     category: "games",
-    desc: "Narrative card/dice roguelike"
+    desc: "Narrative card/dice roguelike",
+    sigil: "images/sigils/chronicles-sigil.png"
   },
   {
     name: "Cruxfade Micro",
     url: "https://watcheratthethreshold.github.io/cruxfade-micro/",
     icon: "\u2728",
     category: "games",
-    desc: "Reference game repo"
+    desc: "Reference game repo",
+    sigil: "images/sigils/cruxfade-micro-sigil.png"
   },
   {
     name: "Shadows of the Deck",
     url: "https://watcheratthethreshold.github.io/shadows-of-the-deck/shadows-of-the-deck/",
     icon: "\uD83C\uDCCF",
     category: "games",
-    desc: "Roguelike card game"
+    desc: "Roguelike card game",
+    sigil: "images/sigils/shadows-of-the-deck-sigil.png"
   },
   {
     name: "Rooks Gambit",
     url: "https://watcheratthethreshold.github.io/rooks-gambit/",
     icon: "\u265C",
     category: "games",
-    desc: "Chess960 variant"
+    desc: "Chess960 variant",
+    sigil: "images/sigils/rooks-gambit-sigil.png"
   },
 
   {
@@ -108,7 +120,8 @@ const APPS = [
     url: "https://watcheratthethreshold.github.io/coherence/",
     icon: "\uD83D\uDD2E",
     category: "games",
-    desc: "Creative project"
+    desc: "Creative project",
+    sigil: "images/sigils/coherence-sigil.png"
   },
  
 
@@ -140,13 +153,26 @@ function render(filter = "") {
 
     if (visible.length === 0) return "";
 
-    const cards = visible.map(app => `
-      <a href="${app.url}" target="_blank" rel="noopener" class="card${app.image ? ' has-preview' : ''}">
-        ${app.image ? `<img class="card-preview" src="${app.image}" alt="${app.name}" loading="lazy">` : `<span class="card-icon">${app.icon}</span>`}
-        <span class="card-name">${app.name}</span>
-        ${app.desc ? `<span class="card-desc">${app.desc}</span>` : ""}
-      </a>
-    `).join("");
+    const cards = visible.map(app => {
+      const hasPrev = !!app.image;
+      const sigilHTML = app.sigil
+        ? hasPrev
+          ? `<img class="card-sigil card-sigil-badge" src="${app.sigil}" alt="" loading="lazy">`
+          : `<img class="card-sigil card-sigil-icon" src="${app.sigil}" alt="" loading="lazy">`
+        : "";
+      const iconHTML = !hasPrev && !app.sigil ? `<span class="card-icon">${app.icon}</span>` : "";
+
+      return `
+        <a href="${app.url}" target="_blank" rel="noopener" class="card${hasPrev ? ' has-preview' : ''}">
+          ${hasPrev ? `<img class="card-preview" src="${app.image}" alt="${app.name}" loading="lazy">` : ""}
+          ${iconHTML}
+          ${!hasPrev ? sigilHTML : ""}
+          <span class="card-name">${app.name}</span>
+          ${app.desc ? `<span class="card-desc">${app.desc}</span>` : ""}
+          ${hasPrev ? sigilHTML : ""}
+        </a>
+      `;
+    }).join("");
 
     return `
       <section class="section" data-category="${cat.key}">

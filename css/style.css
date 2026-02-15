@@ -170,7 +170,40 @@ main {
 }
 
 .card.has-preview {
+  position: relative;
   padding-top: 1rem;
+}
+
+/* ── Sigils ── */
+
+.card-sigil {
+  opacity: 0.45;
+  filter:
+    drop-shadow(1px 1px 0px rgba(200, 210, 225, 0.25))
+    drop-shadow(-1px -1px 0px rgba(0, 0, 0, 0.4))
+    drop-shadow(2px 3px 4px rgba(0, 0, 0, 0.5));
+  transition: opacity 0.3s ease;
+}
+
+.card:hover .card-sigil {
+  opacity: 0.65;
+}
+
+/* Game cards: sigil replaces emoji, same size as emoji was */
+.card-sigil-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+  object-fit: contain;
+}
+
+/* Primary/Business cards: sigil badge in lower right */
+.card-sigil-badge {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  object-fit: contain;
 }
 
 .card-icon {
