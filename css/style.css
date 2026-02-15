@@ -1,0 +1,222 @@
+/* ── Reset & Base ── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-weight: 400;
+  background: #1a1f2e;
+  color: #e8e6e1;
+  min-height: 100vh;
+  padding: 0 1.5rem 3rem;
+}
+
+/* ── Mist Overlay ── */
+
+.mist-overlay {
+  background: url('../images/mist1.webp') repeat;
+  opacity: 0.9;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  animation: mistScroll 120s linear infinite;
+}
+
+@keyframes mistScroll {
+  from { background-position: 0 0; }
+  to { background-position: -500px 500px; }
+}
+
+/* ── Header ── */
+
+header {
+  text-align: center;
+  padding: 2.5rem 1rem 1.5rem;
+}
+
+header h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 3rem;
+  letter-spacing: 1px;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Search ── */
+
+.search-wrapper {
+  position: relative;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.search-wrapper input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  padding-right: 2.5rem;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 1rem;
+  color: #e8e6e1;
+  background: rgba(30, 36, 52, 0.5);
+  border: 1px solid rgba(120, 130, 150, 0.25);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.25s ease;
+}
+
+.search-wrapper input::placeholder {
+  color: rgba(200, 196, 188, 0.5);
+}
+
+.search-wrapper input:focus {
+  border-color: rgba(100, 140, 180, 0.5);
+}
+
+.search-hint {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  color: rgba(200, 196, 188, 0.4);
+  background: rgba(120, 130, 150, 0.15);
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.search-wrapper input:focus ~ .search-hint {
+  opacity: 0;
+}
+
+/* ── Dashboard ── */
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── Sections ── */
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 1.4rem;
+  color: rgba(200, 196, 188, 0.85);
+  margin-bottom: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(120, 130, 150, 0.15);
+}
+
+/* ── Card Grid ── */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Primary and Business sections get wider cards */
+.section[data-category="primary"] .card-grid,
+.section[data-category="business"] .card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+/* ── Cards ── */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.25rem;
+  background: rgba(30, 36, 52, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(120, 130, 150, 0.15);
+  border-radius: 12px;
+  text-decoration: none;
+  color: #e8e6e1;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(140, 160, 185, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Card Preview Images ── */
+
+.card-preview {
+  width: 100%;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(120, 130, 150, 0.15);
+  margin-bottom: 0.4rem;
+}
+
+.card.has-preview {
+  padding-top: 1rem;
+}
+
+.card-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.card-name {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-weight: 400;
+  font-size: 1.05rem;
+}
+
+.card-desc {
+  font-size: 0.85rem;
+  color: rgba(200, 196, 188, 0.7);
+  line-height: 1.4;
+}
+
+/* ── Hidden state for search ── */
+
+.section.hidden {
+  display: none;
+}
+
+.card.hidden {
+  display: none;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 2.2rem;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section[data-category="primary"] .card-grid,
+  .section[data-category="business"] .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body {
+    padding: 0 1rem 2rem;
+  }
+}
