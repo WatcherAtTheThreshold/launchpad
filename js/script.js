@@ -19,6 +19,26 @@ const APPS = [
     image: "images/markdown-editor.png",
     sigil: "images/sigils/markdown-editor-sigil.png"
   },
+
+ {
+    name: "Everything Planner",
+    url: "https://watcheratthethreshold.github.io/Everything/",
+    icon: "\uD83D\uDCCB",
+    category: "primary",
+    desc: "Productivity dashboard",
+    image: "images/everything-planner.png",
+    sigil: "images/sigils/everything-planner-sigil.png"
+  },
+
+  {
+    name: "Sheet to MIDI",
+    url: "https://watcheratthethreshold.github.io/music-maker/sheet-to-midi/",
+    icon: "\uD83C\uDFBC",
+    category: "primary",
+    desc: "Sheet music to MIDI converter",
+    image: "images/sheet-to-midi.png",
+    sigil: "images/sigils/sheet-to-midi-sigil.png"
+  },
   // ── Business ──
   {
     name: "Fairweather Productions",
@@ -29,15 +49,7 @@ const APPS = [
     image: "images/fairweather-productions.png",
     sigil: "images/sigils/fairweather-productions-sigil.png"
   },
-  {
-    name: "Fairweather Print Media",
-    url: "https://watcheratthethreshold.github.io/fairweather-print-media/",
-    icon: "\uD83D\uDDA8\uFE0F",
-    category: "business",
-    desc: "Print media site",
-    image: "images/fairweather-print-media.png",
-    sigil: "images/sigils/fairweather-print-media-sigil.png"
-  },
+
   {
     name: "GitHub",
     url: "https://github.com",
@@ -47,6 +59,17 @@ const APPS = [
     image: "images/github.png",
     sigil: "images/sigils/github-sigil.png"
   },
+
+  {
+    name: "Fairweather Print Media",
+    url: "https://watcheratthethreshold.github.io/fairweather-print-media/",
+    icon: "\uD83D\uDDA8\uFE0F",
+    category: "business",
+    desc: "Print media site",
+    image: "images/fairweather-print-media.png",
+    sigil: "images/sigils/fairweather-print-media-sigil.png"
+  },
+
   {
     name: "Google Docs",
     url: "https://docs.google.com",
@@ -56,25 +79,7 @@ const APPS = [
     image: "images/google-docs.png",
     sigil: "images/sigils/google-docs-sigil.png"
   },
-  {
-    name: "Sheet to MIDI",
-    url: "https://watcheratthethreshold.github.io/music-maker/sheet-to-midi/",
-    icon: "\uD83C\uDFBC",
-    category: "primary",
-    desc: "Sheet music to MIDI converter",
-    image: "images/sheet-to-midi.png",
-    sigil: "images/sigils/sheet-to-midi-sigil.png"
-  },
- 
-   {
-    name: "Everything Planner",
-    url: "https://watcheratthethreshold.github.io/Everything/",
-    icon: "\uD83D\uDCCB",
-    category: "primary",
-    desc: "Productivity dashboard",
-    image: "images/everything-planner.png",
-    sigil: "images/sigils/everything-planner-sigil.png"
-  },
+
 
   // ── Sites ──
 
