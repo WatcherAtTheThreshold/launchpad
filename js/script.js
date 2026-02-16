@@ -21,15 +21,6 @@ const APPS = [
   },
   // ── Business ──
   {
-    name: "Fairweather Print Media",
-    url: "https://watcheratthethreshold.github.io/fairweather-print-media/",
-    icon: "\uD83D\uDDA8\uFE0F",
-    category: "business",
-    desc: "Print media site",
-    image: "images/fairweather-print-media.png",
-    sigil: "images/sigils/fairweather-print-media-sigil.png"
-  },
-  {
     name: "Fairweather Productions",
     url: "https://watcheratthethreshold.github.io/fairweather-productions/",
     icon: "\uD83C\uDFAC",
@@ -37,6 +28,15 @@ const APPS = [
     desc: "Production site",
     image: "images/fairweather-productions.png",
     sigil: "images/sigils/fairweather-productions-sigil.png"
+  },
+  {
+    name: "Fairweather Print Media",
+    url: "https://watcheratthethreshold.github.io/fairweather-print-media/",
+    icon: "\uD83D\uDDA8\uFE0F",
+    category: "business",
+    desc: "Print media site",
+    image: "images/fairweather-print-media.png",
+    sigil: "images/sigils/fairweather-print-media-sigil.png"
   },
   {
     name: "GitHub",
