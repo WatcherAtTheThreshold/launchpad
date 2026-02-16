@@ -201,7 +201,7 @@ const APPS = [
   },
   {
     name: "Grok",
-    url: "https://grok.x.ai",
+    url: "https://grok.com",
     icon: "⚡",
     category: "ai",
     desc: "xAI assistant",
