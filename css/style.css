@@ -111,8 +111,9 @@ main {
 .section {
   margin-bottom: 2rem;
   padding: 1.25rem 1.5rem 1.5rem;
-  margin-left: 5rem;
-  margin-right: 5rem;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: calc(100% - 14rem);
   background: rgba(22, 27, 40, 0.5);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -147,14 +148,7 @@ main {
   justify-content: center;
 }
 
-/* Primary and Business sections get wider margins and cards */
-.section[data-category="primary"],
-.section[data-category="business"] {
-  margin-left: auto;
-  margin-right: auto;
-  max-width: calc(100% - 14rem);
-}
-
+/* Primary and Business sections get wider cards */
 .section[data-category="primary"] .card-grid,
 .section[data-category="business"] .card-grid {
   grid-template-columns: repeat(auto-fit, 240px);
