@@ -123,11 +123,48 @@ const APPS = [
     desc: "Creative project",
     sigil: "images/sigils/coherence-sigil.png"
   },
- 
 
-
- 
- 
+  // ── Links ──
+  {
+    name: "YouTube",
+    url: "https://www.youtube.com",
+    icon: "▶",
+    category: "links",
+    desc: "Video streaming",
+    sigil: "images/sigils/youtube-sigil.png"
+  },
+  {
+    name: "Netflix",
+    url: "https://www.netflix.com",
+    icon: "🎬",
+    category: "links",
+    desc: "Movies & TV",
+    sigil: "images/sigils/netflix.sigil.png"
+  },
+  {
+    name: "Midjourney",
+    url: "https://www.midjourney.com",
+    icon: "🎨",
+    category: "links",
+    desc: "AI image generation",
+    sigil: "images/sigils/midjourney-sigil.png"
+  },
+  {
+    name: "Gmail",
+    url: "https://mail.google.com",
+    icon: "✉",
+    category: "links",
+    desc: "Email",
+    sigil: "images/sigils/gmail-sigil.png"
+  },
+  {
+    name: "Amazon",
+    url: "https://www.amazon.com",
+    icon: "📦",
+    category: "links",
+    desc: "Shopping",
+    sigil: "images/sigils/amazon-sigil.png"
+  },
 ];
 
 // Category display order and labels
@@ -135,6 +172,7 @@ const CATEGORIES = [
   { key: "primary", label: "Daily Essentials" },
   { key: "business", label: "Business" },
   { key: "games", label: "Games" },
+  { key: "links", label: "Links" },
   { key: "sites", label: "Sites & Projects" }
 ];
 
