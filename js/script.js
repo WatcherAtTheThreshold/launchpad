@@ -165,6 +165,48 @@ const APPS = [
     desc: "Shopping",
     sigil: "images/sigils/amazon-sigil.png"
   },
+
+  // ── AI ──
+  {
+    name: "Claude",
+    url: "https://claude.ai",
+    icon: "🤖",
+    category: "ai",
+    desc: "Anthropic AI assistant",
+    sigil: "images/sigils/claude-sigil.png"
+  },
+  {
+    name: "Gemini",
+    url: "https://gemini.google.com",
+    icon: "✦",
+    category: "ai",
+    desc: "Google AI assistant",
+    sigil: "images/sigils/gemini-sigil.png"
+  },
+  {
+    name: "DeepSeek",
+    url: "https://chat.deepseek.com",
+    icon: "🔍",
+    category: "ai",
+    desc: "DeepSeek AI assistant",
+    sigil: "images/sigils/deepseek-sigil.png"
+  },
+  {
+    name: "ChatGPT",
+    url: "https://chat.openai.com",
+    icon: "💬",
+    category: "ai",
+    desc: "OpenAI AI assistant",
+    sigil: "images/sigils/chat-gpt-sigil.png"
+  },
+  {
+    name: "Grok",
+    url: "https://grok.x.ai",
+    icon: "⚡",
+    category: "ai",
+    desc: "xAI assistant",
+    sigil: "images/sigils/grok-sigil.png"
+  },
 ];
 
 // Category display order and labels
@@ -173,6 +215,7 @@ const CATEGORIES = [
   { key: "business", label: "Business" },
   { key: "games", label: "Games" },
   { key: "links", label: "Links" },
+  { key: "ai", label: "AI" },
   { key: "sites", label: "Sites & Projects" }
 ];
 
