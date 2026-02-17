@@ -390,6 +390,10 @@ main {
     font-size: 2.2rem;
   }
 
+  .section {
+    max-width: 80%;
+  }
+
   .card-grid,
   .section[data-category="primary"] .card-grid,
   .section[data-category="business"] .card-grid {
