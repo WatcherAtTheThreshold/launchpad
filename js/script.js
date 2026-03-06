@@ -297,7 +297,7 @@ render();
   const FADE_MS = 2000;
   const CROSSFADE_MS = 3000;
   const CROSSFADE_OFFSET = 3; // seconds before end to start crossfade
-  const TAPE_FRAME_MS = 150; // ms per tape animation frame
+  const TAPE_FRAME_MS = 75; // ms per tape animation frame
 
   // DOM refs
   const toggleBtn = document.getElementById("player-toggle");
