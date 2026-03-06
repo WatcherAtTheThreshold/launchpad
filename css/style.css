@@ -311,13 +311,13 @@ main {
 
 .tape-deck {
   position: relative;
-  width: 600px;
+  width: 400px;
   flex-shrink: 0;
 }
 
 .tape-speaker {
   display: block;
-  height: 600px;
+  height: 400px;
   width: auto;
   pointer-events: none;
   align-self: flex-start;
