@@ -292,28 +292,56 @@ render();
 
 (function () {
   const MUSIC_PATH = "audio/music/";
+  const SOUNDS_PATH = "audio/tape-player-sounds/";
+  const TAPE_PATH = "images/tape-graphic/";
   const FADE_MS = 2000;
   const CROSSFADE_MS = 3000;
   const CROSSFADE_OFFSET = 3; // seconds before end to start crossfade
+  const TAPE_FRAME_MS = 150; // ms per tape animation frame
 
+  // DOM refs
   const toggleBtn = document.getElementById("player-toggle");
   const trackLabel = document.getElementById("player-track");
-  const volumeSlider = document.getElementById("player-volume");
+  const tapeControlsImg = document.getElementById("tape-controls-img");
+  const tapeAnimImg = document.getElementById("tape-anim-img");
+  const volHandle = document.getElementById("tape-vol-handle");
 
+  // Control image states
+  const CTRL_IDLE = TAPE_PATH + "tape-controls/tape-controls1.png";
+  const CTRL_PLAY = TAPE_PATH + "tape-controls/tape-controls2.png";
+
+  // Tape animation frames
+  const TAPE_FRAMES = [
+    TAPE_PATH + "tape-playing/tape-playing1.png",
+    TAPE_PATH + "tape-playing/tape-playing2.png",
+    TAPE_PATH + "tape-playing/tape-playing3.png",
+    TAPE_PATH + "tape-playing/tape-playing4.png"
+  ];
+
+  // Music audio
   let tracks = [];
   let trackIndex = 0;
   let isPlaying = false;
   let masterVolume = parseFloat(localStorage.getItem("lp-volume") || "0.5");
-  let audioA = new Audio();
-  let audioB = new Audio();
+  const audioA = new Audio();
+  const audioB = new Audio();
   let activeAudio = audioA;
   let nextAudio = audioB;
   let fadeRAF = null;
   let crossfading = false;
 
-  volumeSlider.value = masterVolume;
+  // Sound effects
+  const btnPress = new Audio(SOUNDS_PATH + "button-press.mp3");
+  const tapeHiss = new Audio(SOUNDS_PATH + "tape-hiss.mp3");
+  let hissRAF = null;
 
-  // Shuffle array in place
+  // Tape animation state
+  let tapeFrame = 0;
+  let tapeAnimRAF = null;
+  let lastFrameTime = 0;
+
+  // ── Helpers ──
+
   function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -322,24 +350,19 @@ render();
     return arr;
   }
 
-  // Format filename for display
   function displayName(filename) {
     return filename.replace(/\.mp3$/i, "").replace(/-/g, " ");
   }
 
-  // Set volume on an audio element, clamped
   function setVol(audio, v) {
     audio.volume = Math.max(0, Math.min(1, v));
   }
 
-  // Fade an audio element's volume from start to end over duration ms
   function fade(audio, from, to, duration, onDone) {
     const startTime = performance.now();
     setVol(audio, from);
-
     function step(now) {
-      const elapsed = now - startTime;
-      const t = Math.min(elapsed / duration, 1);
+      const t = Math.min((now - startTime) / duration, 1);
       setVol(audio, from + (to - from) * t);
       if (t < 1) {
         fadeRAF = requestAnimationFrame(step);
@@ -350,23 +373,129 @@ render();
     fadeRAF = requestAnimationFrame(step);
   }
 
-  // Load a track into an audio element
   function loadTrack(audio, index) {
     audio.src = MUSIC_PATH + tracks[index];
     audio.load();
   }
 
-  // Advance to next track index (wraps)
   function nextIndex() {
     return (trackIndex + 1) % tracks.length;
   }
 
-  // Update the track name display
   function updateLabel() {
     trackLabel.textContent = displayName(tracks[trackIndex]);
   }
 
-  // Start crossfade near end of current track
+  // ── Tape animation ──
+
+  function stepTape(now) {
+    if (now - lastFrameTime >= TAPE_FRAME_MS) {
+      tapeFrame = (tapeFrame + 1) % TAPE_FRAMES.length;
+      tapeAnimImg.src = TAPE_FRAMES[tapeFrame];
+      lastFrameTime = now;
+    }
+    tapeAnimRAF = requestAnimationFrame(stepTape);
+  }
+
+  function startTapeAnim() {
+    lastFrameTime = performance.now();
+    tapeAnimRAF = requestAnimationFrame(stepTape);
+  }
+
+  function stopTapeAnim() {
+    if (tapeAnimRAF) {
+      cancelAnimationFrame(tapeAnimRAF);
+      tapeAnimRAF = null;
+    }
+    tapeAnimImg.src = TAPE_FRAMES[0];
+  }
+
+  // ── Tape hiss — plays once on play, fades out over 5s ──
+
+  function playHiss() {
+    if (hissRAF) cancelAnimationFrame(hissRAF);
+    tapeHiss.currentTime = 0;
+    tapeHiss.volume = 0.6;
+    tapeHiss.play().catch(() => {});
+    const start = performance.now();
+    const duration = 5000;
+    function hissStep(now) {
+      const t = Math.min((now - start) / duration, 1);
+      tapeHiss.volume = Math.max(0, 0.6 * (1 - t));
+      if (t < 1) {
+        hissRAF = requestAnimationFrame(hissStep);
+      } else {
+        tapeHiss.pause();
+      }
+    }
+    hissRAF = requestAnimationFrame(hissStep);
+  }
+
+  function stopHiss() {
+    if (hissRAF) { cancelAnimationFrame(hissRAF); hissRAF = null; }
+    tapeHiss.pause();
+  }
+
+  // ── Button press sound ──
+
+  function playBtnPress() {
+    btnPress.currentTime = 0;
+    btnPress.play().catch(() => {});
+  }
+
+  // ── Volume handle drag ──
+
+  function positionHandle(vol) {
+    const slotH = volHandle.parentElement.offsetHeight;
+    const handleH = volHandle.offsetHeight;
+    const usable = slotH - handleH;
+    volHandle.style.top = ((1 - vol) * usable) + "px";
+  }
+
+  let dragging = false;
+
+  volHandle.addEventListener("mousedown", (e) => {
+    dragging = true;
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  volHandle.addEventListener("touchstart", (e) => {
+    dragging = true;
+    e.stopPropagation();
+  }, { passive: true });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+    const slotRect = volHandle.parentElement.getBoundingClientRect();
+    const handleH = volHandle.offsetHeight;
+    const usable = slotRect.height - handleH;
+    let relY = e.clientY - slotRect.top - handleH / 2;
+    relY = Math.max(0, Math.min(usable, relY));
+    masterVolume = 1 - relY / usable;
+    localStorage.setItem("lp-volume", masterVolume);
+    if (isPlaying && !crossfading) setVol(activeAudio, masterVolume);
+    positionHandle(masterVolume);
+  });
+
+  document.addEventListener("touchmove", (e) => {
+    if (!dragging) return;
+    const slotRect = volHandle.parentElement.getBoundingClientRect();
+    const handleH = volHandle.offsetHeight;
+    const usable = slotRect.height - handleH;
+    let relY = e.touches[0].clientY - slotRect.top - handleH / 2;
+    relY = Math.max(0, Math.min(usable, relY));
+    masterVolume = 1 - relY / usable;
+    localStorage.setItem("lp-volume", masterVolume);
+    if (isPlaying && !crossfading) setVol(activeAudio, masterVolume);
+    positionHandle(masterVolume);
+  }, { passive: true });
+
+  document.addEventListener("mouseup", () => { dragging = false; });
+  document.addEventListener("touchend", () => { dragging = false; });
+
+  // ── Crossfade ──
+
   function onTimeUpdate() {
     if (crossfading) return;
     const remaining = activeAudio.duration - activeAudio.currentTime;
@@ -376,14 +505,10 @@ render();
       loadTrack(nextAudio, ni);
       setVol(nextAudio, 0);
       nextAudio.play().catch(() => {});
-
-      // Fade out active, fade in next
       const startTime = performance.now();
       const fromVol = activeAudio.volume;
-
       function crossStep(now) {
-        const elapsed = now - startTime;
-        const t = Math.min(elapsed / CROSSFADE_MS, 1);
+        const t = Math.min((now - startTime) / CROSSFADE_MS, 1);
         setVol(activeAudio, fromVol * (1 - t));
         setVol(nextAudio, masterVolume * t);
         if (t < 1) {
@@ -391,7 +516,6 @@ render();
         } else {
           activeAudio.pause();
           activeAudio.removeEventListener("timeupdate", onTimeUpdate);
-          // Swap
           const temp = activeAudio;
           activeAudio = nextAudio;
           nextAudio = temp;
@@ -405,7 +529,6 @@ render();
     }
   }
 
-  // Handle track ending naturally (fallback if crossfade didn't trigger)
   function onEnded() {
     activeAudio.removeEventListener("timeupdate", onTimeUpdate);
     crossfading = false;
@@ -418,11 +541,13 @@ render();
     activeAudio.addEventListener("timeupdate", onTimeUpdate);
   }
 
-  // Play
+  // ── Play / Pause ──
+
   function play() {
     isPlaying = true;
-    toggleBtn.innerHTML = "&#9646;&#9646;"; // pause icon
-    toggleBtn.title = "Pause music";
+    tapeControlsImg.src = CTRL_PLAY;
+    startTapeAnim();
+    playHiss();
     updateLabel();
     setVol(activeAudio, 0);
     activeAudio.play().catch(() => {});
@@ -432,11 +557,11 @@ render();
     activeAudio.addEventListener("ended", onEnded);
   }
 
-  // Pause with fade out
   function pause() {
     isPlaying = false;
-    toggleBtn.innerHTML = "&#9654;"; // play icon
-    toggleBtn.title = "Play music";
+    tapeControlsImg.src = CTRL_IDLE;
+    stopTapeAnim();
+    stopHiss();
     if (fadeRAF) cancelAnimationFrame(fadeRAF);
     const currentVol = activeAudio.volume;
     fade(activeAudio, currentVol, 0, 1000, () => {
@@ -445,9 +570,9 @@ render();
     });
   }
 
-  // Toggle
   toggleBtn.addEventListener("click", () => {
     if (!tracks.length) return;
+    playBtnPress();
     if (isPlaying) {
       pause();
     } else {
@@ -455,16 +580,12 @@ render();
     }
   });
 
-  // Volume slider
-  volumeSlider.addEventListener("input", () => {
-    masterVolume = parseFloat(volumeSlider.value);
-    localStorage.setItem("lp-volume", masterVolume);
-    if (isPlaying && !crossfading) {
-      setVol(activeAudio, masterVolume);
-    }
+  // ── Init ──
+
+  window.addEventListener("load", () => {
+    positionHandle(masterVolume);
   });
 
-  // Load tracks
   fetch(MUSIC_PATH + "tracks.json")
     .then(r => r.json())
     .then(list => {
