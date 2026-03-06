@@ -626,8 +626,8 @@ render();
   document.getElementById("tape-btn-stop").addEventListener("click", () => {
     if (!tracks.length || !isPlaying) return;
     playBtnPress();
-    flashControl(CTRL_STOP, CTRL_IDLE);
     pause();
+    flashControl(CTRL_STOP, CTRL_IDLE);
   });
 
   // ── Init ──
