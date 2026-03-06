@@ -413,7 +413,7 @@ render();
     tapeAnimImg.src = TAPE_FRAMES[0];
   }
 
-  // ── Tape hiss — plays once on play, fades out over 5s ──
+  // ── Tape hiss — plays once on play, fades out over 2s ──
 
   function playHiss() {
     if (hissRAF) cancelAnimationFrame(hissRAF);
@@ -421,7 +421,7 @@ render();
     tapeHiss.volume = 0.6;
     tapeHiss.play().catch(() => {});
     const start = performance.now();
-    const duration = 5000;
+    const duration = 2000;
     function hissStep(now) {
       const t = Math.min((now - start) / duration, 1);
       tapeHiss.volume = Math.max(0, 0.6 * (1 - t));
