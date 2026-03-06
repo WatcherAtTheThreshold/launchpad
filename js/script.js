@@ -309,6 +309,9 @@ render();
   // Control image states
   const CTRL_IDLE = TAPE_PATH + "tape-controls/tape-controls1.png";
   const CTRL_PLAY = TAPE_PATH + "tape-controls/tape-controls2.png";
+  const CTRL_BACK = TAPE_PATH + "tape-controls/tape-controls3.png";
+  const CTRL_FWD  = TAPE_PATH + "tape-controls/tape-controls4.png";
+  const CTRL_STOP = TAPE_PATH + "tape-controls/tape-controls5.png";
 
   // Tape animation frames
   const TAPE_FRAMES = [
@@ -570,6 +573,31 @@ render();
     });
   }
 
+  // Briefly flash a control image then settle on the post-action state
+  function flashControl(flashSrc, settleSrc) {
+    tapeControlsImg.src = flashSrc;
+    setTimeout(() => { tapeControlsImg.src = settleSrc; }, 200);
+  }
+
+  // Skip to a specific track index, respecting play state
+  function skipTo(index) {
+    crossfading = false;
+    activeAudio.removeEventListener("timeupdate", onTimeUpdate);
+    activeAudio.removeEventListener("ended", onEnded);
+    if (fadeRAF) cancelAnimationFrame(fadeRAF);
+    activeAudio.pause();
+    trackIndex = index;
+    loadTrack(activeAudio, trackIndex);
+    updateLabel();
+    if (isPlaying) {
+      setVol(activeAudio, 0);
+      activeAudio.play().catch(() => {});
+      fade(activeAudio, 0, masterVolume, FADE_MS);
+      activeAudio.addEventListener("timeupdate", onTimeUpdate);
+      activeAudio.addEventListener("ended", onEnded);
+    }
+  }
+
   toggleBtn.addEventListener("click", () => {
     if (!tracks.length) return;
     playBtnPress();
@@ -578,6 +606,28 @@ render();
     } else {
       play();
     }
+  });
+
+  document.getElementById("tape-btn-back").addEventListener("click", () => {
+    if (!tracks.length) return;
+    playBtnPress();
+    const pi = (trackIndex - 1 + tracks.length) % tracks.length;
+    flashControl(CTRL_BACK, isPlaying ? CTRL_PLAY : CTRL_IDLE);
+    skipTo(pi);
+  });
+
+  document.getElementById("tape-btn-fwd").addEventListener("click", () => {
+    if (!tracks.length) return;
+    playBtnPress();
+    flashControl(CTRL_FWD, isPlaying ? CTRL_PLAY : CTRL_IDLE);
+    skipTo(nextIndex());
+  });
+
+  document.getElementById("tape-btn-stop").addEventListener("click", () => {
+    if (!tracks.length || !isPlaying) return;
+    playBtnPress();
+    flashControl(CTRL_STOP, CTRL_IDLE);
+    pause();
   });
 
   // ── Init ──

@@ -295,9 +295,8 @@ main {
 
 .tape-player {
   position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 0;
+  left: 0;
   z-index: 100;
   user-select: none;
 }
@@ -388,19 +387,23 @@ main {
   z-index: 3;
 }
 
-/* Invisible play button hotspot — over the play button graphic */
-.tape-play-btn {
+/* Invisible button hotspots — one per control button */
+.tape-btn {
   position: absolute;
-  left: 6%;
   bottom: 7%;
-  width: 20%;
   height: 22%;
+  width: 20%;
   background: transparent;
   border: none;
   cursor: pointer;
   padding: 0;
   z-index: 5;
 }
+
+.tape-play-btn { left: 6%; }
+.tape-btn-back { left: 26%; }
+.tape-btn-fwd  { left: 46%; }
+.tape-btn-stop { left: 65%; }
 
 /* ── Responsive ── */
 
