@@ -455,4 +455,12 @@ main {
     margin-right: 0;
     max-width: 75%;
   }
+    .tape-deck {
+    width: 300px;
+  }
+
+  .tape-speaker {
+    height: 300px;
+  }
+}
 }
