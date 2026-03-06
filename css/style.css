@@ -306,6 +306,7 @@ main {
   justify-content: space-between;
   align-items: flex-start;
   background: #7e8082;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.35);
 }
 
 .tape-deck {
