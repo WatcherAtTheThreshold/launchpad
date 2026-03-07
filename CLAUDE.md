@@ -11,14 +11,17 @@ Single-page portfolio launcher / dashboard. Vanilla HTML, CSS, and JavaScript �
 ```
 launchpad/
 ├── index.html                 # Single page entry point
-├── css/style.css              # All styles (~400 lines)
-├── js/script.js               # All logic (~475 lines)
-├── audio/music/
-│   ├── tracks.json            # Playlist manifest
-│   └── *.mp3                  # Ambient music tracks
+├── css/style.css              # All styles (~450 lines)
+├── js/script.js               # All logic (~500 lines)
+├── audio/
+│   ├── music/
+│   │   ├── tracks.json        # Playlist manifest
+│   │   └── *.mp3              # Ambient music tracks
+│   └── tape-player-sounds/    # UI sound effects (button-press.mp3, tape-hiss.mp3)
 ├── images/
 │   ├── *.png / *.webp         # Card preview images
-│   └── sigils/                # Card badge icons (per-app)
+│   ├── sigils/                # Card badge icons (per-app)
+│   └── tape-graphic/          # Tape deck sprite layers (see below)
 └── docs/
     ├── design-guide.md        # Full design system reference
     └── launch-pad*.md         # Planning docs
@@ -43,6 +46,35 @@ The `render()` function iterates categories, filters apps, and builds the full d
 4. `links` — Links (external services)
 5. `ai` — AI (chat assistants)
 6. `sites` — Sites & Projects
+
+### Tape Deck
+
+Fixed bar across the top of the page (`position: fixed; top: 0; z-index: 1`). Content scrolls over it (sections are `z-index: 2`). Layout is flex with the deck on the left and a speaker graphic on the right.
+
+**Sprite layer stack** (all inside `.tape-deck`, a `position: relative` container):
+
+| Element | Class | What it is |
+|---|---|---|
+| `img.tape-bg` | `.tape-bg` | Grey deck background (`deck-backgorund.png` — note typo in filename) |
+| `img#tape-anim-img` | `.tape-layer .tape-layer-cassette` | Animated tape reels (4-frame cycle) |
+| `img#tape-controls-img` | `.tape-layer .tape-layer-controls` | Controls strip (5 states: idle, play, back, fwd, stop) |
+| `div#tape-vol` | `.tape-vol` | Volume slider container (slot + draggable handle) |
+
+**Image folders in `images/tape-graphic/`:**
+- `tape-playing/` — `tape-playing1.png` through `tape-playing4.png` (reel animation frames)
+- `tape-controls/` — `tape-controls1.png` (idle) through `tape-controls5.png` (stop flash)
+- `volume-slider-control/` — `volume-slider-slot.png`, `volume-slider-handle.png`
+- `deck-backgorund.png`, `speaker.png` (root of folder)
+
+**Animation:** `requestAnimationFrame` loop cycling 4 reel frames at 75ms each. Only runs while playing.
+
+**Controls flash pattern:** On button press, `pause()` is called first (sets controls to idle), then `flashControl(CTRL_X, CTRL_IDLE)` overrides with the flash image and settles after 200ms. Order matters — flash must come after pause or pause overwrites it.
+
+**Volume drag:** Mousedown/touchstart on handle → mousemove/touchmove on document → maps drag position within slot height to 0–1 volume. Handle position restored from `localStorage` on load.
+
+**Sound effects:** `tape-hiss.mp3` plays on every play(), fades from 0.6 to 0 over 2 seconds via RAF. `button-press.mp3` plays on every button press.
+
+**Sizing:** Deck is `width: 300px` on mobile (`max-width: 600px`), larger on desktop (adjust `.tape-deck { width }` and `.tape-speaker { height }` together — inner layers are all percentage-based and scale automatically).
 
 ### Music Player
 
