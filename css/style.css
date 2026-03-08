@@ -327,6 +327,7 @@ main {
   display: block;
   width: 100%;
   height: auto;
+  margin-left: 5px;
 }
 
 /* Shared layer styles */
