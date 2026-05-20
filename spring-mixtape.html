@@ -138,9 +138,51 @@
     .tape-btn-fwd  { left: 46%; }
     .tape-btn-stop { left: 65%; }
 
+    /* ── Tracklist ── */
+
+    .tracklist {
+      list-style: none;
+      width: 100%;
+      max-width: 435px;
+      margin: 1.5rem auto 2rem;
+      padding: 0 0.5rem;
+    }
+
+    .tracklist-item {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      color: rgba(162, 154, 205, 0.45);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+
+    .tracklist-item:hover {
+      color: #c3bce7;
+      background: rgba(162, 154, 205, 0.08);
+    }
+
+    .tracklist-item.active {
+      color: #c3bce7;
+    }
+
+    .tracklist-num {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      min-width: 1.4rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
     @media (max-width: 600px) {
-      .tape-deck   { width: 300px; }
-      .tape-speaker { height: 300px; }
+      .tape-deck    { width: 100%; }
+      .tape-speaker { display: none; }
+      .tracklist    { max-width: 100%; }
     }
   </style>
 </head>
@@ -163,6 +205,8 @@
     </div>
     <img class="tape-speaker" src="images/tape-graphic/speaker.png" alt="" draggable="false">
   </div>
+
+  <ol id="tracklist" class="tracklist"></ol>
 
   <script>
     (function () {
@@ -205,6 +249,8 @@
         "WaitingOnSpring.mp3"
       ];
 
+      const tracklistEl = document.getElementById("tracklist");
+
       let trackIndex = 0;
       let isPlaying = false;
       let masterVolume = parseFloat(localStorage.getItem("sm-volume") || "0.5");
@@ -226,7 +272,10 @@
       // ── Helpers ──
 
       function displayName(filename) {
-        return filename.replace(/\.mp3$/i, "").replace(/-/g, " ");
+        return filename
+          .replace(/\.mp3$/i, "")
+          .replace(/-/g, " ")
+          .replace(/([a-z])([A-Z])/g, "$1 $2");
       }
 
       function setVol(audio, v) {
@@ -259,6 +308,25 @@
 
       function updateLabel() {
         trackLabel.textContent = displayName(tracks[trackIndex]);
+        updateTracklist();
+      }
+
+      // ── Tracklist ──
+
+      function buildTracklist() {
+        tracks.forEach((filename, i) => {
+          const li = document.createElement("li");
+          li.className = "tracklist-item" + (i === 0 ? " active" : "");
+          li.innerHTML = '<span class="tracklist-num">' + (i + 1) + "</span>" + displayName(filename);
+          li.addEventListener("click", () => { skipTo(i); });
+          tracklistEl.appendChild(li);
+        });
+      }
+
+      function updateTracklist() {
+        tracklistEl.querySelectorAll(".tracklist-item").forEach((item, i) => {
+          item.classList.toggle("active", i === trackIndex);
+        });
       }
 
       // ── Tape animation ──
@@ -494,6 +562,7 @@
         positionHandle(masterVolume);
       });
 
+      buildTracklist();
       loadTrack(activeAudio, trackIndex);
       updateLabel();
     })();
