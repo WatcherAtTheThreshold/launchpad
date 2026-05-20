@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spring Mixtape</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1f2e;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+
+    /* ── Tape Player ── */
+
+    .tape-player {
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      background: #6c6fbe;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.35);
+      width: 100%;
+    }
+
+    .tape-deck {
+      position: relative;
+      width: 435px;
+      flex-shrink: 0;
+    }
+
+    .tape-speaker {
+      display: block;
+      height: 435px;
+      width: auto;
+      pointer-events: none;
+      align-self: flex-start;
+    }
+
+    .tape-bg {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-left: 5px;
+    }
+
+    .tape-layer {
+      position: absolute;
+      display: block;
+      pointer-events: none;
+      height: auto;
+    }
+
+    .tape-layer-cassette {
+      top: 6%;
+      left: 6%;
+      width: 79%;
+      z-index: 1;
+    }
+
+    .tape-layer-controls {
+      bottom: 7%;
+      left: 6%;
+      width: 79%;
+      z-index: 2;
+    }
+
+    .tape-vol {
+      position: absolute;
+      right: 4%;
+      top: 7%;
+      height: 62%;
+      z-index: 3;
+      cursor: ns-resize;
+    }
+
+    .tape-vol-slot {
+      display: block;
+      height: 100%;
+      width: auto;
+      pointer-events: none;
+    }
+
+    .tape-vol-handle {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220%;
+      height: auto;
+      top: 0;
+      cursor: grab;
+      z-index: 4;
+    }
+
+    .tape-vol-handle:active {
+      cursor: grabbing;
+    }
+
+    .tape-track-name {
+      position: absolute;
+      left: 8%;
+      right: 16%;
+      bottom: 2.5%;
+      font-family: 'Source Sans Pro', sans-serif;
+      font-size: 1.0rem;
+      color: #a29acd;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .tape-btn {
+      position: absolute;
+      bottom: 7%;
+      height: 22%;
+      width: 20%;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 5;
+    }
+
+    .tape-play-btn { left: 6%; }
+    .tape-btn-back { left: 26%; }
+    .tape-btn-fwd  { left: 46%; }
+    .tape-btn-stop { left: 65%; }
+
+    @media (max-width: 600px) {
+      .tape-deck   { width: 300px; }
+      .tape-speaker { height: 300px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="tape-player" class="tape-player">
+    <div class="tape-deck">
+      <img class="tape-bg" src="images/tape-graphic/deck-backgorund.png" alt="" draggable="false">
+      <img class="tape-layer tape-layer-cassette" id="tape-anim-img" src="images/tape-graphic/tape-playing/seasons/spring-mixtape-small1.png" alt="" draggable="false">
+      <img class="tape-layer tape-layer-controls" id="tape-controls-img" src="images/tape-graphic/tape-controls/tape-controls1.png" alt="" draggable="false">
+      <div class="tape-vol" id="tape-vol">
+        <img class="tape-vol-slot" src="images/tape-graphic/volume-slider-control/volume-slider-slot.png" alt="" draggable="false">
+        <img class="tape-vol-handle" id="tape-vol-handle" src="images/tape-graphic/volume-slider-control/volume-slider-handle.png" alt="" draggable="false">
+      </div>
+      <span class="tape-track-name" id="player-track">Music</span>
+      <button class="tape-btn tape-play-btn" id="player-toggle" aria-label="Play / Pause"></button>
+      <button class="tape-btn tape-btn-back" id="tape-btn-back" aria-label="Previous track"></button>
+      <button class="tape-btn tape-btn-fwd" id="tape-btn-fwd" aria-label="Next track"></button>
+      <button class="tape-btn tape-btn-stop" id="tape-btn-stop" aria-label="Stop"></button>
+    </div>
+    <img class="tape-speaker" src="images/tape-graphic/speaker.png" alt="" draggable="false">
+  </div>
+
+  <script>
+    (function () {
+      const MUSIC_PATH  = "audio/music/spring-mix/";
+      const SOUNDS_PATH = "audio/tape-player-sounds/";
+      const TAPE_PATH   = "images/tape-graphic/";
+      const FADE_MS         = 2000;
+      const CROSSFADE_MS    = 3000;
+      const CROSSFADE_OFFSET = 3;
+      const TAPE_FRAME_MS   = 75;
+
+      const toggleBtn       = document.getElementById("player-toggle");
+      const trackLabel      = document.getElementById("player-track");
+      const tapeControlsImg = document.getElementById("tape-controls-img");
+      const tapeAnimImg     = document.getElementById("tape-anim-img");
+      const volHandle       = document.getElementById("tape-vol-handle");
+
+      const CTRL_IDLE = TAPE_PATH + "tape-controls/tape-controls1.png";
+      const CTRL_PLAY = TAPE_PATH + "tape-controls/tape-controls2.png";
+      const CTRL_BACK = TAPE_PATH + "tape-controls/tape-controls3.png";
+      const CTRL_FWD  = TAPE_PATH + "tape-controls/tape-controls4.png";
+      const CTRL_STOP = TAPE_PATH + "tape-controls/tape-controls5.png";
+
+      const TAPE_FRAMES = [
+        TAPE_PATH + "tape-playing/seasons/spring-mixtape-small1.png",
+        TAPE_PATH + "tape-playing/seasons/spring-mixtape-small2.png",
+        TAPE_PATH + "tape-playing/seasons/spring-mixtape-small3.png",
+        TAPE_PATH + "tape-playing/seasons/spring-mixtape-small4.png"
+      ];
+
+      const tracks = [
+        "MothersDayInG.mp3",
+        "CircleOfFifths-Alt-2.mp3",
+        "InTheGarden-full.mp3",
+        "LaterSundayInB-full.mp3",
+        "MondayInC.mp3",
+        "MondayLoopInC-full.mp3",
+        "Phase2-C-2.mp3",
+        "SilverSurfer.mp3",
+        "WaitingOnSpring.mp3"
+      ];
+
+      let trackIndex = 0;
+      let isPlaying = false;
+      let masterVolume = parseFloat(localStorage.getItem("sm-volume") || "0.5");
+      const audioA = new Audio();
+      const audioB = new Audio();
+      let activeAudio = audioA;
+      let nextAudio   = audioB;
+      let fadeRAF = null;
+      let crossfading = false;
+
+      const btnPress = new Audio(SOUNDS_PATH + "button-press.mp3");
+      const tapeHiss = new Audio(SOUNDS_PATH + "tape-hiss.mp3");
+      let hissRAF = null;
+
+      let tapeFrame = 0;
+      let tapeAnimRAF = null;
+      let lastFrameTime = 0;
+
+      // ── Helpers ──
+
+      function displayName(filename) {
+        return filename.replace(/\.mp3$/i, "").replace(/-/g, " ");
+      }
+
+      function setVol(audio, v) {
+        audio.volume = Math.max(0, Math.min(1, v));
+      }
+
+      function fade(audio, from, to, duration, onDone) {
+        const startTime = performance.now();
+        setVol(audio, from);
+        function step(now) {
+          const t = Math.min((now - startTime) / duration, 1);
+          setVol(audio, from + (to - from) * t);
+          if (t < 1) {
+            fadeRAF = requestAnimationFrame(step);
+          } else {
+            if (onDone) onDone();
+          }
+        }
+        fadeRAF = requestAnimationFrame(step);
+      }
+
+      function loadTrack(audio, index) {
+        audio.src = MUSIC_PATH + tracks[index];
+        audio.load();
+      }
+
+      function nextIndex() {
+        return (trackIndex + 1) % tracks.length;
+      }
+
+      function updateLabel() {
+        trackLabel.textContent = displayName(tracks[trackIndex]);
+      }
+
+      // ── Tape animation ──
+
+      function stepTape(now) {
+        if (now - lastFrameTime >= TAPE_FRAME_MS) {
+          tapeFrame = (tapeFrame + 1) % TAPE_FRAMES.length;
+          tapeAnimImg.src = TAPE_FRAMES[tapeFrame];
+          lastFrameTime = now;
+        }
+        tapeAnimRAF = requestAnimationFrame(stepTape);
+      }
+
+      function startTapeAnim() {
+        lastFrameTime = performance.now();
+        tapeAnimRAF = requestAnimationFrame(stepTape);
+      }
+
+      function stopTapeAnim() {
+        if (tapeAnimRAF) { cancelAnimationFrame(tapeAnimRAF); tapeAnimRAF = null; }
+        tapeAnimImg.src = TAPE_FRAMES[0];
+      }
+
+      // ── Tape hiss ──
+
+      function playHiss() {
+        if (hissRAF) cancelAnimationFrame(hissRAF);
+        tapeHiss.currentTime = 0;
+        tapeHiss.volume = 0.6;
+        tapeHiss.play().catch(() => {});
+        const start = performance.now();
+        const duration = 2000;
+        function hissStep(now) {
+          const t = Math.min((now - start) / duration, 1);
+          tapeHiss.volume = Math.max(0, 0.6 * (1 - t));
+          if (t < 1) {
+            hissRAF = requestAnimationFrame(hissStep);
+          } else {
+            tapeHiss.pause();
+          }
+        }
+        hissRAF = requestAnimationFrame(hissStep);
+      }
+
+      function stopHiss() {
+        if (hissRAF) { cancelAnimationFrame(hissRAF); hissRAF = null; }
+        tapeHiss.pause();
+      }
+
+      // ── Button press sound ──
+
+      function playBtnPress() {
+        btnPress.currentTime = 0;
+        btnPress.play().catch(() => {});
+      }
+
+      // ── Volume handle drag ──
+
+      function positionHandle(vol) {
+        const slotH   = volHandle.parentElement.offsetHeight;
+        const handleH = volHandle.offsetHeight;
+        const usable  = slotH - handleH;
+        volHandle.style.top = ((1 - vol) * usable) + "px";
+      }
+
+      let dragging = false;
+
+      volHandle.addEventListener("mousedown", (e) => {
+        dragging = true;
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      volHandle.addEventListener("touchstart", (e) => {
+        dragging = true;
+        e.stopPropagation();
+      }, { passive: true });
+
+      document.addEventListener("mousemove", (e) => {
+        if (!dragging) return;
+        const slotRect = volHandle.parentElement.getBoundingClientRect();
+        const handleH  = volHandle.offsetHeight;
+        const usable   = slotRect.height - handleH;
+        let relY = e.clientY - slotRect.top - handleH / 2;
+        relY = Math.max(0, Math.min(usable, relY));
+        masterVolume = 1 - relY / usable;
+        localStorage.setItem("sm-volume", masterVolume);
+        if (isPlaying && !crossfading) setVol(activeAudio, masterVolume);
+        positionHandle(masterVolume);
+      });
+
+      document.addEventListener("touchmove", (e) => {
+        if (!dragging) return;
+        const slotRect = volHandle.parentElement.getBoundingClientRect();
+        const handleH  = volHandle.offsetHeight;
+        const usable   = slotRect.height - handleH;
+        let relY = e.touches[0].clientY - slotRect.top - handleH / 2;
+        relY = Math.max(0, Math.min(usable, relY));
+        masterVolume = 1 - relY / usable;
+        localStorage.setItem("sm-volume", masterVolume);
+        if (isPlaying && !crossfading) setVol(activeAudio, masterVolume);
+        positionHandle(masterVolume);
+      }, { passive: true });
+
+      document.addEventListener("mouseup",  () => { dragging = false; });
+      document.addEventListener("touchend", () => { dragging = false; });
+
+      // ── Crossfade ──
+
+      function onTimeUpdate() {
+        if (crossfading) return;
+        const remaining = activeAudio.duration - activeAudio.currentTime;
+        if (remaining <= CROSSFADE_OFFSET && remaining > 0 && tracks.length > 1) {
+          crossfading = true;
+          const ni = nextIndex();
+          loadTrack(nextAudio, ni);
+          setVol(nextAudio, 0);
+          nextAudio.play().catch(() => {});
+          const startTime = performance.now();
+          const fromVol   = activeAudio.volume;
+          function crossStep(now) {
+            const t = Math.min((now - startTime) / CROSSFADE_MS, 1);
+            setVol(activeAudio, fromVol * (1 - t));
+            setVol(nextAudio,   masterVolume * t);
+            if (t < 1) {
+              fadeRAF = requestAnimationFrame(crossStep);
+            } else {
+              activeAudio.pause();
+              activeAudio.removeEventListener("timeupdate", onTimeUpdate);
+              const temp = activeAudio;
+              activeAudio = nextAudio;
+              nextAudio   = temp;
+              trackIndex  = ni;
+              updateLabel();
+              crossfading = false;
+              activeAudio.addEventListener("timeupdate", onTimeUpdate);
+            }
+          }
+          fadeRAF = requestAnimationFrame(crossStep);
+        }
+      }
+
+      function onEnded() {
+        activeAudio.removeEventListener("timeupdate", onTimeUpdate);
+        crossfading = false;
+        trackIndex = nextIndex();
+        loadTrack(activeAudio, trackIndex);
+        updateLabel();
+        setVol(activeAudio, 0);
+        activeAudio.play().catch(() => {});
+        fade(activeAudio, 0, masterVolume, FADE_MS);
+        activeAudio.addEventListener("timeupdate", onTimeUpdate);
+      }
+
+      // ── Play / Pause ──
+
+      function play() {
+        isPlaying = true;
+        tapeControlsImg.src = CTRL_PLAY;
+        startTapeAnim();
+        playHiss();
+        updateLabel();
+        setVol(activeAudio, 0);
+        activeAudio.play().catch(() => {});
+        if (fadeRAF) cancelAnimationFrame(fadeRAF);
+        fade(activeAudio, 0, masterVolume, FADE_MS);
+        activeAudio.addEventListener("timeupdate", onTimeUpdate);
+        activeAudio.addEventListener("ended", onEnded);
+      }
+
+      function pause() {
+        isPlaying = false;
+        tapeControlsImg.src = CTRL_IDLE;
+        stopTapeAnim();
+        stopHiss();
+        if (fadeRAF) cancelAnimationFrame(fadeRAF);
+        const currentVol = activeAudio.volume;
+        fade(activeAudio, currentVol, 0, 1000, () => {
+          activeAudio.pause();
+          activeAudio.removeEventListener("timeupdate", onTimeUpdate);
+        });
+      }
+
+      function flashControl(flashSrc, settleSrc) {
+        tapeControlsImg.src = flashSrc;
+        setTimeout(() => { tapeControlsImg.src = settleSrc; }, 200);
+      }
+
+      function skipTo(index) {
+        crossfading = false;
+        activeAudio.removeEventListener("timeupdate", onTimeUpdate);
+        activeAudio.removeEventListener("ended", onEnded);
+        if (fadeRAF) cancelAnimationFrame(fadeRAF);
+        activeAudio.pause();
+        trackIndex = index;
+        loadTrack(activeAudio, trackIndex);
+        updateLabel();
+        if (isPlaying) {
+          setVol(activeAudio, 0);
+          activeAudio.play().catch(() => {});
+          fade(activeAudio, 0, masterVolume, FADE_MS);
+          activeAudio.addEventListener("timeupdate", onTimeUpdate);
+          activeAudio.addEventListener("ended", onEnded);
+        }
+      }
+
+      toggleBtn.addEventListener("click", () => {
+        playBtnPress();
+        if (isPlaying) { pause(); } else { play(); }
+      });
+
+      document.getElementById("tape-btn-back").addEventListener("click", () => {
+        playBtnPress();
+        const pi = (trackIndex - 1 + tracks.length) % tracks.length;
+        flashControl(CTRL_BACK, isPlaying ? CTRL_PLAY : CTRL_IDLE);
+        skipTo(pi);
+      });
+
+      document.getElementById("tape-btn-fwd").addEventListener("click", () => {
+        playBtnPress();
+        flashControl(CTRL_FWD, isPlaying ? CTRL_PLAY : CTRL_IDLE);
+        skipTo(nextIndex());
+      });
+
+      document.getElementById("tape-btn-stop").addEventListener("click", () => {
+        if (!isPlaying) return;
+        playBtnPress();
+        pause();
+        flashControl(CTRL_STOP, CTRL_IDLE);
+      });
+
+      window.addEventListener("load", () => {
+        positionHandle(masterVolume);
+      });
+
+      loadTrack(activeAudio, trackIndex);
+      updateLabel();
+    })();
+  </script>
+</body>
+</html>
