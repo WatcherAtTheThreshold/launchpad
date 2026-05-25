@@ -444,15 +444,16 @@ main {
   padding: 0.4rem 0.5rem;
   border-radius: 6px;
   cursor: pointer;
-  color: rgba(195, 188, 231, 0.35);
+  color: rgba(195, 188, 231, 0.72);
   font-family: 'Source Sans Pro', sans-serif;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.07em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.6);
 }
 
 .tracklist-item.active {
-  color: #c3bce7;
+  color: #e8e4f8;
 }
 
 .tracklist-num {
