@@ -13,8 +13,6 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
       font-family: 'Source Sans Pro', sans-serif;
     }
 
@@ -138,14 +136,22 @@
     .tape-btn-fwd  { left: 46%; }
     .tape-btn-stop { left: 65%; }
 
+    /* ── Below-player layout ── */
+
+    .below-player {
+      display: flex;
+      align-items: stretch;
+      flex: 1;
+      width: 100%;
+    }
+
     /* ── Tracklist ── */
 
     .tracklist {
       list-style: none;
-      width: 100%;
-      max-width: 435px;
-      margin: 1.5rem auto 2rem;
-      padding: 0 0.5rem;
+      flex-shrink: 0;
+      width: 200px;
+      padding: 1.5rem 0.5rem 2rem 1rem;
     }
 
     .tracklist-item {
@@ -159,14 +165,9 @@
       font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      transition: color 0.2s ease, background 0.2s ease;
+      transition: color 0.2s ease;
     }
-    /*
-    .tracklist-item:hover {
-      color: #c3bce7;
-      background: rgba(162, 154, 205, 0.08);
-    }
-    */
+
     .tracklist-item.active {
       color: #c3bce7;
     }
@@ -179,10 +180,26 @@
       flex-shrink: 0;
     }
 
+    /* ── Painting ── */
+
+    .painting-display {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .painting-img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.4s ease;
+    }
+
     @media (max-width: 600px) {
-      .tape-deck    { width: 100%; }
-      .tape-speaker { display: none; }
-      .tracklist    { max-width: 100%; }
+      .tape-deck        { width: 100%; }
+      .tape-speaker     { display: none; }
+      .tracklist        { width: 150px; padding: 1rem 0.25rem 1rem 0.5rem; }
+      .painting-display { min-width: 260px; overflow: visible; }
     }
   </style>
 </head>
@@ -206,7 +223,12 @@
     <img class="tape-speaker" src="images/tape-graphic/speaker.png" alt="" draggable="false">
   </div>
 
-  <ol id="tracklist" class="tracklist"></ol>
+  <div class="below-player">
+    <ol id="tracklist" class="tracklist"></ol>
+    <div class="painting-display">
+      <img id="painting-img" class="painting-img" src="images/paintings/background-1.png" alt="" draggable="false">
+    </div>
+  </div>
 
   <script>
     (function () {
@@ -223,6 +245,7 @@
       const tapeControlsImg = document.getElementById("tape-controls-img");
       const tapeAnimImg     = document.getElementById("tape-anim-img");
       const volHandle       = document.getElementById("tape-vol-handle");
+      const paintingImg     = document.getElementById("painting-img");
 
       const CTRL_IDLE = TAPE_PATH + "tape-controls/tape-controls1.png";
       const CTRL_PLAY = TAPE_PATH + "tape-controls/tape-controls2.png";
@@ -238,17 +261,17 @@
       ];
 
       const tracks = [
-        "MothersDayInG.mp3",
-        "InTheGarden.mp3",
-        "LaterSundayInB.mp3",
-        "MondayInC.mp3",
-        "TheBirchesInC.mp3",
-        "Phase2-C-2.mp3",
-        "PluieEtGris.mp3",
-        "TheBreeze.mp3",
-        "FrissonObscur.mp3",
-        "SilverSurfer.mp3",
-        "WaitingOnSpring.mp3"
+        { file: "MothersDayInG.mp3",   painting: "images/paintings/background-1.png" },
+        { file: "InTheGarden.mp3",     painting: "images/paintings/background-2.png" },
+        { file: "LaterSundayInB.mp3",  painting: "images/paintings/background-3.png" },
+        { file: "MondayInC.mp3",       painting: "images/paintings/background-4.png" },
+        { file: "TheBirchesInC.mp3",   painting: "images/paintings/background-5.png" },
+        { file: "Phase2-C-2.mp3",      painting: "images/paintings/background-6.png" },
+        { file: "PluieEtGris.mp3",     painting: "images/paintings/background-7.png" },
+        { file: "TheBreeze.mp3",       painting: "images/paintings/background-8.png" },
+        { file: "FrissonObscur.mp3",   painting: "images/paintings/background-9.png" },
+        { file: "SilverSurfer.mp3",    painting: "images/paintings/background-10.png" },
+        { file: "WaitingOnSpring.mp3", painting: "images/paintings/background-11.png" }
       ];
 
       const tracklistEl = document.getElementById("tracklist");
@@ -300,7 +323,7 @@
       }
 
       function loadTrack(audio, index) {
-        audio.src = MUSIC_PATH + tracks[index];
+        audio.src = MUSIC_PATH + tracks[index].file;
         audio.load();
       }
 
@@ -309,17 +332,18 @@
       }
 
       function updateLabel() {
-        trackLabel.textContent = displayName(tracks[trackIndex]);
+        trackLabel.textContent = displayName(tracks[trackIndex].file);
         updateTracklist();
+        updatePainting();
       }
 
       // ── Tracklist ──
 
       function buildTracklist() {
-        tracks.forEach((filename, i) => {
+        tracks.forEach((track, i) => {
           const li = document.createElement("li");
           li.className = "tracklist-item" + (i === 0 ? " active" : "");
-          li.innerHTML = '<span class="tracklist-num">' + (i + 1) + "</span>" + displayName(filename);
+          li.innerHTML = '<span class="tracklist-num">' + (i + 1) + "</span>" + displayName(track.file);
           li.addEventListener("click", () => { skipTo(i); });
           tracklistEl.appendChild(li);
         });
@@ -329,6 +353,18 @@
         tracklistEl.querySelectorAll(".tracklist-item").forEach((item, i) => {
           item.classList.toggle("active", i === trackIndex);
         });
+      }
+
+      // ── Painting ──
+
+      function updatePainting() {
+        const newSrc = tracks[trackIndex].painting;
+        if (paintingImg.src.endsWith(newSrc)) return;
+        paintingImg.style.opacity = "0";
+        setTimeout(() => {
+          paintingImg.src = newSrc;
+          paintingImg.style.opacity = "1";
+        }, 400);
       }
 
       // ── Tape animation ──
