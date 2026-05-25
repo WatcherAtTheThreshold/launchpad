@@ -354,7 +354,10 @@ render();
   }
 
   function displayName(filename) {
-    return filename.replace(/\.mp3$/i, "").replace(/-/g, " ");
+    return filename
+      .replace(/\.mp3$/i, "")
+      .replace(/-/g, " ")
+      .replace(/([a-z])([A-Z])/g, "$1 $2");
   }
 
   function setVol(audio, v) {
@@ -387,6 +390,28 @@ render();
 
   function updateLabel() {
     trackLabel.textContent = displayName(tracks[trackIndex]);
+    updateTracklist();
+  }
+
+  // ── Tracklist ──
+
+  const tracklistEl = document.getElementById("tracklist");
+
+  function buildTracklist() {
+    tracklistEl.innerHTML = "";
+    tracks.forEach((filename, i) => {
+      const li = document.createElement("li");
+      li.className = "tracklist-item" + (i === trackIndex ? " active" : "");
+      li.innerHTML = '<span class="tracklist-num">' + (i + 1) + "</span>" + displayName(filename);
+      li.addEventListener("click", () => { skipTo(i); });
+      tracklistEl.appendChild(li);
+    });
+  }
+
+  function updateTracklist() {
+    tracklistEl.querySelectorAll(".tracklist-item").forEach((item, i) => {
+      item.classList.toggle("active", i === trackIndex);
+    });
   }
 
   // ── Tape animation ──
@@ -641,6 +666,7 @@ render();
     .then(list => {
       tracks = shuffle(list);
       trackIndex = 0;
+      buildTracklist();
       loadTrack(activeAudio, trackIndex);
       updateLabel();
     })
