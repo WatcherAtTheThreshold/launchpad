@@ -10,11 +10,10 @@
 
     body {
       background: #1a1f2e;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
       font-family: 'Source Sans Pro', sans-serif;
     }
 
@@ -110,7 +109,7 @@
       bottom: 2.5%;
       font-family: 'Source Sans Pro', sans-serif;
       font-size: 1.0rem;
-      color: rgba(200, 196, 188, 0.6);
+      color: #a29acd;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -161,9 +160,87 @@
       color: #c3bce7;
     }
 
+    /* ── Below-player layout ── */
+
+    .below-player {
+      display: flex;
+      align-items: stretch;
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+    }
+
+    /* ── Tracklist ── */
+
+    .tracklist {
+      list-style: none;
+      flex-shrink: 0;
+      width: 250px;
+      padding: 2rem 0.75rem 2rem 1.5rem;
+      overflow-y: auto;
+    }
+
+    .tracklist-item {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      color: rgba(162, 154, 205, 0.45);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: color 0.2s ease;
+    }
+
+    .tracklist-item.active {
+      color: #c3bce7;
+    }
+
+    .tracklist-num {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      min-width: 1.4rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── Painting ── */
+
+    @keyframes pan-left {
+      from { object-position: 0% 50%; }
+      to   { object-position: 100% 50%; }
+    }
+
+    .painting-display {
+      flex: 1;
+      min-height: 0;
+      padding: 1.5rem 1.5rem 1.5rem 0.5rem;
+    }
+
+    .painting-strip {
+      height: 100%;
+      width: 220px;
+      overflow: hidden;
+    }
+
+    .painting-img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 0% 50%;
+      animation: pan-left 50s ease-in-out infinite alternate;
+      transition: opacity 0.4s ease;
+    }
+
     @media (max-width: 600px) {
-      .tape-deck   { width: 300px; }
-      .tape-speaker { height: 300px; }
+      .tape-deck        { width: 100%; }
+      .tape-speaker     { display: none; }
+      .tracklist        { width: 150px; padding: 1rem 0.25rem 1rem 0.5rem; }
+      .painting-display { padding: 0.75rem 0.75rem 0.75rem 0.25rem; }
+      .painting-strip   { width: 180px; }
     }
   </style>
 </head>
@@ -193,9 +270,18 @@
     <a href="interlude-mixtape.html">Interlude</a>
   </nav>
 
+  <div class="below-player">
+    <ol id="tracklist" class="tracklist"></ol>
+    <div class="painting-display">
+      <div class="painting-strip">
+        <img id="painting-img" class="painting-img" src="images/paintings/background-1.png" alt="" draggable="false">
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
-      const MUSIC_PATH  = "audio/music/";
+      const MUSIC_PATH  = "audio/music/winter/";
       const SOUNDS_PATH = "audio/tape-player-sounds/";
       const TAPE_PATH   = "images/tape-graphic/";
       const FADE_MS         = 2000;
@@ -203,11 +289,12 @@
       const CROSSFADE_OFFSET = 3;
       const TAPE_FRAME_MS   = 75;
 
-      const toggleBtn      = document.getElementById("player-toggle");
-      const trackLabel     = document.getElementById("player-track");
+      const toggleBtn       = document.getElementById("player-toggle");
+      const trackLabel      = document.getElementById("player-track");
       const tapeControlsImg = document.getElementById("tape-controls-img");
-      const tapeAnimImg    = document.getElementById("tape-anim-img");
-      const volHandle      = document.getElementById("tape-vol-handle");
+      const tapeAnimImg     = document.getElementById("tape-anim-img");
+      const volHandle       = document.getElementById("tape-vol-handle");
+      const paintingImg     = document.getElementById("painting-img");
 
       const CTRL_IDLE = TAPE_PATH + "tape-controls/tape-controls1.png";
       const CTRL_PLAY = TAPE_PATH + "tape-controls/tape-controls2.png";
@@ -222,10 +309,30 @@
         TAPE_PATH + "tape-playing/tape-playing4.png"
       ];
 
-      let tracks = [];
+      const tracks = [
+        { file: "sunday-new-launchpad.mp3",   painting: "images/paintings/background-1.png" },
+        { file: "ambient.mp3",                painting: "images/paintings/background-2.png" },
+        { file: "ambient2.mp3",               painting: "images/paintings/background-3.png" },
+        { file: "meander-fin.mp3",            painting: "images/paintings/background-4.png" },
+        { file: "coherence.mp3",              painting: "images/paintings/background-5.png" },
+        { file: "coherence-threshold.mp3",    painting: "images/paintings/background-6.png" },
+        { file: "daily-routine.mp3",          painting: "images/paintings/background-7.png" },
+        { file: "jaunt.mp3",                  painting: "images/paintings/background-8.png" },
+        { file: "soft-drift.mp3",             painting: "images/paintings/background-9.png" },
+        { file: "stroll.mp3",                 painting: "images/paintings/background-10.png" },
+        { file: "stroll2.mp3",                painting: "images/paintings/background-11.png" },
+        { file: "sunday-lofi-launchpad2.mp3", painting: "images/paintings/background-1.png" },
+        { file: "sunday-launchpad.mp3",       painting: "images/paintings/background-2.png" },
+        { file: "sunday-new-launchpad2.mp3",  painting: "images/paintings/background-3.png" },
+        { file: "sunday-lofi-launchpad.mp3",  painting: "images/paintings/background-4.png" },
+        { file: "sunday-chill-launchpad.mp3", painting: "images/paintings/background-5.png" }
+      ];
+
+      const tracklistEl = document.getElementById("tracklist");
+
       let trackIndex = 0;
       let isPlaying = false;
-      let masterVolume = parseFloat(localStorage.getItem("lp-volume") || "0.5");
+      let masterVolume = parseFloat(localStorage.getItem("wm-volume") || "0.5");
       const audioA = new Audio();
       const audioB = new Audio();
       let activeAudio = audioA;
@@ -243,16 +350,11 @@
 
       // ── Helpers ──
 
-      function shuffle(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
-      }
-
       function displayName(filename) {
-        return filename.replace(/\.mp3$/i, "").replace(/-/g, " ");
+        return filename
+          .replace(/\.mp3$/i, "")
+          .replace(/-/g, " ")
+          .replace(/([a-z])([A-Z])/g, "$1 $2");
       }
 
       function setVol(audio, v) {
@@ -275,7 +377,7 @@
       }
 
       function loadTrack(audio, index) {
-        audio.src = MUSIC_PATH + tracks[index];
+        audio.src = MUSIC_PATH + tracks[index].file;
         audio.load();
       }
 
@@ -284,7 +386,39 @@
       }
 
       function updateLabel() {
-        trackLabel.textContent = displayName(tracks[trackIndex]);
+        trackLabel.textContent = displayName(tracks[trackIndex].file);
+        updateTracklist();
+        updatePainting();
+      }
+
+      // ── Tracklist ──
+
+      function buildTracklist() {
+        tracks.forEach((track, i) => {
+          const li = document.createElement("li");
+          li.className = "tracklist-item" + (i === 0 ? " active" : "");
+          li.innerHTML = '<span class="tracklist-num">' + (i + 1) + "</span>" + displayName(track.file);
+          li.addEventListener("click", () => { skipTo(i); });
+          tracklistEl.appendChild(li);
+        });
+      }
+
+      function updateTracklist() {
+        tracklistEl.querySelectorAll(".tracklist-item").forEach((item, i) => {
+          item.classList.toggle("active", i === trackIndex);
+        });
+      }
+
+      // ── Painting ──
+
+      function updatePainting() {
+        const newSrc = tracks[trackIndex].painting;
+        if (paintingImg.src.endsWith(newSrc)) return;
+        paintingImg.style.opacity = "0";
+        setTimeout(() => {
+          paintingImg.src = newSrc;
+          paintingImg.style.opacity = "1";
+        }, 400);
       }
 
       // ── Tape animation ──
@@ -371,7 +505,7 @@
         let relY = e.clientY - slotRect.top - handleH / 2;
         relY = Math.max(0, Math.min(usable, relY));
         masterVolume = 1 - relY / usable;
-        localStorage.setItem("lp-volume", masterVolume);
+        localStorage.setItem("wm-volume", masterVolume);
         if (isPlaying && !crossfading) setVol(activeAudio, masterVolume);
         positionHandle(masterVolume);
       });
@@ -384,7 +518,7 @@
         let relY = e.touches[0].clientY - slotRect.top - handleH / 2;
         relY = Math.max(0, Math.min(usable, relY));
         masterVolume = 1 - relY / usable;
-        localStorage.setItem("lp-volume", masterVolume);
+        localStorage.setItem("wm-volume", masterVolume);
         if (isPlaying && !crossfading) setVol(activeAudio, masterVolume);
         positionHandle(masterVolume);
       }, { passive: true });
@@ -492,13 +626,11 @@
       }
 
       toggleBtn.addEventListener("click", () => {
-        if (!tracks.length) return;
         playBtnPress();
         if (isPlaying) { pause(); } else { play(); }
       });
 
       document.getElementById("tape-btn-back").addEventListener("click", () => {
-        if (!tracks.length) return;
         playBtnPress();
         const pi = (trackIndex - 1 + tracks.length) % tracks.length;
         flashControl(CTRL_BACK, isPlaying ? CTRL_PLAY : CTRL_IDLE);
@@ -506,14 +638,13 @@
       });
 
       document.getElementById("tape-btn-fwd").addEventListener("click", () => {
-        if (!tracks.length) return;
         playBtnPress();
         flashControl(CTRL_FWD, isPlaying ? CTRL_PLAY : CTRL_IDLE);
         skipTo(nextIndex());
       });
 
       document.getElementById("tape-btn-stop").addEventListener("click", () => {
-        if (!tracks.length || !isPlaying) return;
+        if (!isPlaying) return;
         playBtnPress();
         pause();
         flashControl(CTRL_STOP, CTRL_IDLE);
@@ -523,17 +654,9 @@
         positionHandle(masterVolume);
       });
 
-      fetch(MUSIC_PATH + "tracks.json")
-        .then(r => r.json())
-        .then(list => {
-          tracks = shuffle(list);
-          trackIndex = 0;
-          loadTrack(activeAudio, trackIndex);
-          updateLabel();
-        })
-        .catch(() => {
-          trackLabel.textContent = "No tracks found";
-        });
+      buildTracklist();
+      loadTrack(activeAudio, trackIndex);
+      updateLabel();
     })();
   </script>
 </body>

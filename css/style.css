@@ -424,51 +424,9 @@ main {
 .tape-btn-fwd  { left: 46%; }
 .tape-btn-stop { left: 65%; }
 
-/* ── Tracklist ── */
-
-.tracklist {
-  position: fixed;
-  top: 445px;
-  left: 0;
-  width: 19rem;
-  list-style: none;
-  padding: 0.5rem 1rem;
-  max-height: calc(100vh - 455px);
-  overflow-y: auto;
-}
-
-.tracklist-item {
-  display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-  padding: 0.4rem 0.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  color: rgba(195, 188, 231, 0.72);
-  font-family: 'Source Sans Pro', sans-serif;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.6);
-}
-
-.tracklist-item.active {
-  color: #e8e4f8;
-}
-
-.tracklist-num {
-  font-size: 0.65rem;
-  opacity: 0.5;
-  min-width: 1.4rem;
-  text-align: right;
-  flex-shrink: 0;
-}
-
 /* ── Responsive ── */
 
 @media (max-width: 600px) {
-  .tracklist { display: none; }
-
   header h1 {
     font-size: 2.2rem;
   }

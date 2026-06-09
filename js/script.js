@@ -291,13 +291,81 @@ render();
 // ── Music Player ──
 
 (function () {
-  const MUSIC_PATH = "audio/music/";
   const SOUNDS_PATH = "audio/tape-player-sounds/";
   const TAPE_PATH = "images/tape-graphic/";
   const FADE_MS = 2000;
   const CROSSFADE_MS = 3000;
-  const CROSSFADE_OFFSET = 3; // seconds before end to start crossfade
-  const TAPE_FRAME_MS = 75; // ms per tape animation frame
+  const CROSSFADE_OFFSET = 3;
+  const TAPE_FRAME_MS = 75;
+
+  const ALBUM_PATHS = {
+    winter:    "audio/music/winter/",
+    spring:    "audio/music/spring-mix/",
+    interlude: "audio/music/interlude/"
+  };
+
+  const ALBUM_TAPE_FRAMES = {
+    winter: [
+      TAPE_PATH + "tape-playing/tape-playing1.png",
+      TAPE_PATH + "tape-playing/tape-playing2.png",
+      TAPE_PATH + "tape-playing/tape-playing3.png",
+      TAPE_PATH + "tape-playing/tape-playing4.png"
+    ],
+    spring: [
+      TAPE_PATH + "tape-playing/seasons/spring-mixtape-small1.png",
+      TAPE_PATH + "tape-playing/seasons/spring-mixtape-small2.png",
+      TAPE_PATH + "tape-playing/seasons/spring-mixtape-small3.png",
+      TAPE_PATH + "tape-playing/seasons/spring-mixtape-small4.png"
+    ],
+    interlude: [
+      TAPE_PATH + "tape-playing/interlude/interlude-mixtape1.png",
+      TAPE_PATH + "tape-playing/interlude/interlude-mixtape2.png",
+      TAPE_PATH + "tape-playing/interlude/interlude-mixtape3.png",
+      TAPE_PATH + "tape-playing/interlude/interlude-mixtape4.png"
+    ]
+  };
+
+  const ALL_TRACKS = [
+    // Winter
+    { file: "sunday-new-launchpad.mp3",   album: "winter" },
+    { file: "ambient.mp3",                album: "winter" },
+    { file: "ambient2.mp3",               album: "winter" },
+    { file: "meander-fin.mp3",            album: "winter" },
+    { file: "coherence.mp3",              album: "winter" },
+    { file: "coherence-threshold.mp3",    album: "winter" },
+    { file: "daily-routine.mp3",          album: "winter" },
+    { file: "jaunt.mp3",                  album: "winter" },
+    { file: "soft-drift.mp3",             album: "winter" },
+    { file: "stroll.mp3",                 album: "winter" },
+    { file: "stroll2.mp3",                album: "winter" },
+    { file: "sunday-lofi-launchpad2.mp3", album: "winter" },
+    { file: "sunday-launchpad.mp3",       album: "winter" },
+    { file: "sunday-new-launchpad2.mp3",  album: "winter" },
+    { file: "sunday-lofi-launchpad.mp3",  album: "winter" },
+    { file: "sunday-chill-launchpad.mp3", album: "winter" },
+    // Spring
+    { file: "MothersDayInG.mp3",          album: "spring" },
+    { file: "InTheGarden.mp3",            album: "spring" },
+    { file: "LaterSundayInB.mp3",         album: "spring" },
+    { file: "TheBirchesInC.mp3",          album: "spring" },
+    { file: "MondayInC.mp3",              album: "spring" },
+    { file: "Phase2-C-2.mp3",             album: "spring" },
+    { file: "PluieEtGris.mp3",            album: "spring" },
+    { file: "TheBreeze.mp3",              album: "spring" },
+    { file: "FrissonObscur.mp3",          album: "spring" },
+    { file: "SilverSurfer.mp3",           album: "spring" },
+    { file: "WaitingOnSpring.mp3",        album: "spring" },
+    { file: "Forest.mp3",                 album: "spring" },
+    // Interlude
+    { file: "AsinaMundi.mp3",             album: "interlude" },
+    { file: "ForestWindAndRain.mp3",      album: "interlude" },
+    { file: "Jupiter.mp3",                album: "interlude" },
+    { file: "Lament.mp3",                 album: "interlude" },
+    { file: "Venus.mp3",                  album: "interlude" },
+    { file: "gallery.mp3",                album: "interlude" },
+    { file: "mix.mp3",                    album: "interlude" },
+    { file: "refrain.mp3",                album: "interlude" }
+  ];
 
   // DOM refs
   const toggleBtn = document.getElementById("player-toggle");
@@ -313,13 +381,7 @@ render();
   const CTRL_FWD  = TAPE_PATH + "tape-controls/tape-controls4.png";
   const CTRL_STOP = TAPE_PATH + "tape-controls/tape-controls5.png";
 
-  // Tape animation frames
-  const TAPE_FRAMES = [
-    TAPE_PATH + "tape-playing/tape-playing1.png",
-    TAPE_PATH + "tape-playing/tape-playing2.png",
-    TAPE_PATH + "tape-playing/tape-playing3.png",
-    TAPE_PATH + "tape-playing/tape-playing4.png"
-  ];
+  let TAPE_FRAMES = ALBUM_TAPE_FRAMES.winter.slice();
 
   // Music audio
   let tracks = [];
@@ -380,7 +442,8 @@ render();
   }
 
   function loadTrack(audio, index) {
-    audio.src = MUSIC_PATH + tracks[index];
+    const t = tracks[index];
+    audio.src = ALBUM_PATHS[t.album] + t.file;
     audio.load();
   }
 
@@ -389,29 +452,14 @@ render();
   }
 
   function updateLabel() {
-    trackLabel.textContent = displayName(tracks[trackIndex]);
-    updateTracklist();
+    trackLabel.textContent = displayName(tracks[trackIndex].file);
+    updateTapeFrames();
   }
 
-  // ── Tracklist ──
-
-  const tracklistEl = document.getElementById("tracklist");
-
-  function buildTracklist() {
-    tracklistEl.innerHTML = "";
-    tracks.forEach((filename, i) => {
-      const li = document.createElement("li");
-      li.className = "tracklist-item" + (i === trackIndex ? " active" : "");
-      li.innerHTML = '<span class="tracklist-num">' + (i + 1) + "</span>" + displayName(filename);
-      li.addEventListener("click", () => { skipTo(i); });
-      tracklistEl.appendChild(li);
-    });
-  }
-
-  function updateTracklist() {
-    tracklistEl.querySelectorAll(".tracklist-item").forEach((item, i) => {
-      item.classList.toggle("active", i === trackIndex);
-    });
+  function updateTapeFrames() {
+    TAPE_FRAMES = ALBUM_TAPE_FRAMES[tracks[trackIndex].album];
+    tapeFrame = 0;
+    if (!isPlaying) tapeAnimImg.src = TAPE_FRAMES[0];
   }
 
   // ── Tape animation ──
@@ -661,16 +709,8 @@ render();
     positionHandle(masterVolume);
   });
 
-  fetch(MUSIC_PATH + "tracks.json")
-    .then(r => r.json())
-    .then(list => {
-      tracks = shuffle(list);
-      trackIndex = 0;
-      buildTracklist();
-      loadTrack(activeAudio, trackIndex);
-      updateLabel();
-    })
-    .catch(() => {
-      trackLabel.textContent = "No tracks found";
-    });
+  tracks = shuffle([...ALL_TRACKS]);
+  trackIndex = 0;
+  loadTrack(activeAudio, trackIndex);
+  updateLabel();
 })();
