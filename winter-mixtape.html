@@ -138,6 +138,29 @@
     .tape-btn-fwd  { left: 46%; }
     .tape-btn-stop { left: 65%; }
 
+    /* ── Mixtape Nav ── */
+
+    .mixtape-nav {
+      display: flex;
+      gap: 2rem;
+      padding: 0.55rem 1.5rem;
+      width: 100%;
+      border-bottom: 1px solid rgba(162, 154, 205, 0.08);
+    }
+
+    .mixtape-nav a {
+      color: rgba(162, 154, 205, 0.45);
+      text-decoration: none;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: color 0.2s ease;
+    }
+
+    .mixtape-nav a.active {
+      color: #c3bce7;
+    }
+
     @media (max-width: 600px) {
       .tape-deck   { width: 300px; }
       .tape-speaker { height: 300px; }
@@ -163,6 +186,12 @@
     </div>
     <img class="tape-speaker" src="images/tape-graphic/speaker.png" alt="" draggable="false">
   </div>
+
+  <nav class="mixtape-nav">
+    <a href="winter-mixtape.html" class="active">Winter</a>
+    <a href="spring-mixtape.html">Spring</a>
+    <a href="interlude-mixtape.html">Interlude</a>
+  </nav>
 
   <script>
     (function () {
