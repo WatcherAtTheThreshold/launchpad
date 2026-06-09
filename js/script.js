@@ -577,6 +577,7 @@ render();
     const remaining = activeAudio.duration - activeAudio.currentTime;
     if (remaining <= CROSSFADE_OFFSET && remaining > 0 && tracks.length > 1) {
       crossfading = true;
+      activeAudio.removeEventListener("ended", onEnded);
       const ni = nextIndex();
       loadTrack(nextAudio, ni);
       setVol(nextAudio, 0);
@@ -599,6 +600,7 @@ render();
           updateLabel();
           crossfading = false;
           activeAudio.addEventListener("timeupdate", onTimeUpdate);
+          activeAudio.addEventListener("ended", onEnded);
         }
       }
       fadeRAF = requestAnimationFrame(crossStep);
@@ -615,6 +617,7 @@ render();
     activeAudio.play().catch(() => {});
     fade(activeAudio, 0, masterVolume, FADE_MS);
     activeAudio.addEventListener("timeupdate", onTimeUpdate);
+    activeAudio.addEventListener("ended", onEnded);
   }
 
   // ── Play / Pause ──
