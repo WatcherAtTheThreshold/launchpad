@@ -365,7 +365,11 @@ render();
     { file: "Venus.mp3",                  album: "interlude" },
     { file: "gallery.mp3",                album: "interlude" },
     { file: "mix.mp3",                    album: "interlude" },
-    { file: "refrain.mp3",                album: "interlude" }
+    { file: "refrain.mp3",                album: "interlude" },
+    { file: "picaroPicante.mp3",          album: "interlude" },
+    { file: "inversions.mp3",             album: "interlude" },
+    { file: "Saturn.mp3",                 album: "interlude" },
+    { file: "stackingTriads.mp3",         album: "interlude" }
   ];
 
   // DOM refs
