@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spring Mixtape</title>
+  <title>Marples</title>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -248,7 +248,7 @@
   <div id="tape-player" class="tape-player">
     <div class="tape-deck">
       <img class="tape-bg" src="images/tape-graphic/deck-backgorund.png" alt="" draggable="false">
-      <img class="tape-layer tape-layer-cassette" id="tape-anim-img" src="images/tape-graphic/tape-playing/seasons/spring-mixtape-small1.png" alt="" draggable="false">
+      <img class="tape-layer tape-layer-cassette" id="tape-anim-img" src="images/tape-graphic/tape-playing/marples/marples-tape1.png" alt="" draggable="false">
       <img class="tape-layer tape-layer-controls" id="tape-controls-img" src="images/tape-graphic/tape-controls/tape-controls1.png" alt="" draggable="false">
       <div class="tape-vol" id="tape-vol">
         <img class="tape-vol-slot" src="images/tape-graphic/volume-slider-control/volume-slider-slot.png" alt="" draggable="false">
@@ -265,9 +265,9 @@
 
   <nav class="mixtape-nav">
     <a href="winter-mixtape.html">Winter</a>
-    <a href="spring-mixtape.html" class="active">Spring</a>
+    <a href="spring-mixtape.html">Spring</a>
     <a href="interlude-mixtape.html">Interlude</a>
-    <a href="marples-mixtape.html">Marples</a>
+    <a href="marples-mixtape.html" class="active">Marples</a>
   </nav>
 
   <div class="below-player">
@@ -281,7 +281,7 @@
 
   <script>
     (function () {
-      const MUSIC_PATH  = "audio/music/spring-mix/";
+      const MUSIC_PATH  = "audio/music/marples/";
       const SOUNDS_PATH = "audio/tape-player-sounds/";
       const TAPE_PATH   = "images/tape-graphic/";
       const FADE_MS         = 2000;
@@ -303,33 +303,24 @@
       const CTRL_STOP = TAPE_PATH + "tape-controls/tape-controls5.png";
 
       const TAPE_FRAMES = [
-        TAPE_PATH + "tape-playing/seasons/spring-mixtape-small1.png",
-        TAPE_PATH + "tape-playing/seasons/spring-mixtape-small2.png",
-        TAPE_PATH + "tape-playing/seasons/spring-mixtape-small3.png",
-        TAPE_PATH + "tape-playing/seasons/spring-mixtape-small4.png"
+        TAPE_PATH + "tape-playing/marples/marples-tape1.png",
+        TAPE_PATH + "tape-playing/marples/marples-tape2.png",
+        TAPE_PATH + "tape-playing/marples/marples-tape3.png",
+        TAPE_PATH + "tape-playing/marples/marples-tape4.png"
       ];
 
       const tracks = [
-        { file: "MothersDayInG.mp3",   painting: "images/paintings/background-1.png" },
-        { file: "InTheGarden.mp3",     painting: "images/paintings/background-2.png" },
-        
-        { file: "LaterSundayInB.mp3",  painting: "images/paintings/background-3.png" },
-        { file: "TheBirchesInC.mp3",   painting: "images/paintings/background-4.png" },
-        { file: "MondayInC.mp3",       painting: "images/paintings/background-5.png" },
-        { file: "Phase2-C-2.mp3",      painting: "images/paintings/background-6.png" },
-        { file: "PluieEtGris.mp3",     painting: "images/paintings/background-7.png" },
-        { file: "TheBreeze.mp3",       painting: "images/paintings/background-8.png" },
-        { file: "FrissonObscur.mp3",   painting: "images/paintings/background-9.png" },
-        { file: "SilverSurfer.mp3",    painting: "images/paintings/background-10.png" },
-        { file: "WaitingOnSpring.mp3", painting: "images/paintings/background-11.png" },
-        { file: "Forest.mp3",          painting: "images/paintings/background-12.png" }
+        { file: "Marples.mp3",   painting: "images/paintings/background-1.png" },
+        { file: "Bizmuth.mp3",   painting: "images/paintings/background-2.png" },
+        { file: "Turples.mp3",   painting: "images/paintings/background-3.png" },
+        { file: "Stack.mp3",     painting: "images/paintings/background-4.png" }
       ];
 
       const tracklistEl = document.getElementById("tracklist");
 
       let trackIndex = 0;
       let isPlaying = false;
-      let masterVolume = parseFloat(localStorage.getItem("sm-volume") || "0.5");
+      let masterVolume = parseFloat(localStorage.getItem("mp-volume") || "0.5");
       const audioA = new Audio();
       const audioB = new Audio();
       let activeAudio = audioA;
@@ -502,7 +493,7 @@
         let relY = e.clientY - slotRect.top - handleH / 2;
         relY = Math.max(0, Math.min(usable, relY));
         masterVolume = 1 - relY / usable;
-        localStorage.setItem("sm-volume", masterVolume);
+        localStorage.setItem("mp-volume", masterVolume);
         if (isPlaying && !crossfading) setVol(activeAudio, masterVolume);
         positionHandle(masterVolume);
       });
@@ -515,7 +506,7 @@
         let relY = e.touches[0].clientY - slotRect.top - handleH / 2;
         relY = Math.max(0, Math.min(usable, relY));
         masterVolume = 1 - relY / usable;
-        localStorage.setItem("sm-volume", masterVolume);
+        localStorage.setItem("mp-volume", masterVolume);
         if (isPlaying && !crossfading) setVol(activeAudio, masterVolume);
         positionHandle(masterVolume);
       }, { passive: true });
@@ -655,7 +646,7 @@
       });
 
       buildTracklist();
-      loadTrack(activeAudio, trackIndex);
+      loadTrack(audioA, trackIndex);
       updateLabel();
     })();
   </script>

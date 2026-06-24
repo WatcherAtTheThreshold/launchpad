@@ -301,7 +301,8 @@ render();
   const ALBUM_PATHS = {
     winter:    "audio/music/winter/",
     spring:    "audio/music/spring-mix/",
-    interlude: "audio/music/interlude/"
+    interlude: "audio/music/interlude/",
+    marples:   "audio/music/marples/"
   };
 
   const ALBUM_TAPE_FRAMES = {
@@ -322,6 +323,12 @@ render();
       TAPE_PATH + "tape-playing/interlude/interlude-mixtape2.png",
       TAPE_PATH + "tape-playing/interlude/interlude-mixtape3.png",
       TAPE_PATH + "tape-playing/interlude/interlude-mixtape4.png"
+    ],
+    marples: [
+      TAPE_PATH + "tape-playing/marples/marples-tape1.png",
+      TAPE_PATH + "tape-playing/marples/marples-tape2.png",
+      TAPE_PATH + "tape-playing/marples/marples-tape3.png",
+      TAPE_PATH + "tape-playing/marples/marples-tape4.png"
     ]
   };
 
@@ -369,7 +376,12 @@ render();
     { file: "picaroPicante.mp3",          album: "interlude" },
     { file: "inversions.mp3",             album: "interlude" },
     { file: "Saturn.mp3",                 album: "interlude" },
-    { file: "stackingTriads.mp3",         album: "interlude" }
+    { file: "stackingTriads.mp3",         album: "interlude" },
+    // Marples
+    { file: "Marples.mp3",               album: "marples" },
+    { file: "Bizmuth.mp3",               album: "marples" },
+    { file: "Turples.mp3",               album: "marples" },
+    { file: "Stack.mp3",                 album: "marples" }
   ];
 
   // DOM refs
