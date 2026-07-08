@@ -105,7 +105,7 @@ const APPS = [
   },
   {
     name: "Shadows of the Deck",
-    url: "https://watcheratthethreshold.github.io/shadows-of-the-deck/shadows-of-the-deck/",
+    url: "https://watcheratthethreshold.github.io/shadows-of-the-deck/",
     icon: "\uD83C\uDCCF",
     category: "games",
     desc: "Roguelike card game",
