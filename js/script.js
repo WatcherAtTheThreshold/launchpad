@@ -382,7 +382,12 @@ render();
     { file: "Bizmuth.mp3",               album: "marples" },
     { file: "Turples.mp3",               album: "marples" },
     { file: "Stack.mp3",                 album: "marples" },
-    { file: "AMurderOfCrows.mp3",        album: "marples" }
+    { file: "AMurderOfCrows.mp3",        album: "marples" },
+    { file: "TheValley.mp3",             album: "marples" },
+    { file: "Violet.mp3",                album: "marples" },
+    { file: "threshold-deep.mp3",        album: "marples" },
+    { file: "happyGast.mp3",             album: "marples" },
+    { file: "Travels.mp3",               album: "marples" }
   ];
 
   // DOM refs
