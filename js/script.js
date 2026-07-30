@@ -387,7 +387,9 @@ render();
     { file: "Violet.mp3",                album: "marples" },
     { file: "threshold-deep.mp3",        album: "marples" },
     { file: "happyGast.mp3",             album: "marples" },
-    { file: "Travels.mp3",               album: "marples" }
+    { file: "Travels.mp3",               album: "marples" },
+    { file: "summersTale.mp3",           album: "marples" },
+    { file: "avalon.mp3",                album: "marples" }
   ];
 
   // DOM refs
