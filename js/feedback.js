@@ -13,12 +13,14 @@
 
 window.Feedback = (function () {
   // ── DELIVERY CONFIG ─────────────────────────────────────────────
-  // Leave ENDPOINT empty to use the email fallback (opens the
-  // listener's mail app, pre-addressed to you). Paste a Formspree
-  // endpoint — "https://formspree.io/f/xxxxxxxx" — to collect silently
-  // in-page instead. That single line is the only change needed.
-  const ENDPOINT = "";
+  // By default this posts silently to FormSubmit's AJAX endpoint for
+  // EMAIL (already activated from the old contact forms — no signup,
+  // no key). Submissions email straight to you, in-page, no redirect.
+  // If FormSubmit ever fails (offline, blocked), it falls back to
+  // opening the listener's mail app. Override ENDPOINT only if you
+  // switch services.
   const EMAIL = "monahanhunt@gmail.com";
+  const ENDPOINT = "";  // "" = FormSubmit AJAX for EMAIL (recommended)
   // ────────────────────────────────────────────────────────────────
 
   const MOODS = [
@@ -173,6 +175,11 @@ window.Feedback = (function () {
     root.querySelector("#fb-send").addEventListener("click", submit);
   }
 
+  function setStatus(msg) {
+    const el = root && root.querySelector("#fb-status");
+    if (el) el.textContent = msg;
+  }
+
   function submit() {
     if (!hasInput()) return;
     const payload = {
@@ -185,31 +192,50 @@ window.Feedback = (function () {
     };
     saved[currentSong] = Object.assign({}, payload, { sent: true });
     persist();
-    deliver(payload);
-
-    const status = root.querySelector("#fb-status");
-    if (status) status.textContent = ENDPOINT
-      ? "✓ sent — thank you, truly."
-      : "✓ opening your mail app to send… thank you.";
     const send = root.querySelector("#fb-send");
-    if (send) { send.disabled = true; send.textContent = "sent"; }
+    if (send) { send.disabled = true; send.textContent = "sending…"; }
+    setStatus("");
+    deliver(payload);
+  }
+
+  function starsOf(rating) {
+    return rating ? "★".repeat(rating) + "☆".repeat(5 - rating) : "(no rating)";
   }
 
   function deliver(p) {
-    if (ENDPOINT) {
-      fetch(ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify(p)
-      }).catch(() => {});
-      return;
-    }
-    // Email fallback — composes a pre-filled message to you
-    const stars = p.rating ? "★".repeat(p.rating) + "☆".repeat(5 - p.rating) : "(no rating)";
+    const target = ENDPOINT || ("https://formsubmit.co/ajax/" + encodeURIComponent(EMAIL));
+    const body = {
+      _subject: p.album + " feedback — " + p.song,
+      _template: "table",
+      _captcha: "false",
+      Album: p.album,
+      Song: p.song,
+      Rating: starsOf(p.rating) + (p.rating ? "  (" + p.rating + "/5)" : ""),
+      Mood: p.moods.length ? p.moods.join(", ") : "(none)",
+      Note: p.note || "(no note)",
+      When: p.when
+    };
+    fetch(target, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(body)
+    })
+      .then(function (r) { if (!r.ok) throw new Error("status " + r.status); return r.json(); })
+      .then(function () {
+        setStatus("✓ sent — thank you, truly.");
+        const send = root && root.querySelector("#fb-send");
+        if (send) send.textContent = "sent";
+      })
+      .catch(function () { mailtoFallback(p); });
+  }
+
+  // Last resort if the request can't go through — open a pre-filled email
+  function mailtoFallback(p) {
+    setStatus("opening your mail app to send…");
     const lines = [
       "Album: " + p.album,
       "Song:  " + p.song,
-      "Rating: " + stars,
+      "Rating: " + starsOf(p.rating),
       "Mood:   " + (p.moods.length ? p.moods.join(", ") : "(none)"),
       "",
       p.note || "(no note)"
