@@ -31,18 +31,39 @@ window.Feedback = (function () {
   let album = "";
   let currentSong = "";
   let root = null;
-  let saved = {};                 // per-song saved feedback (localStorage)
+  let saved = {};                 // per-song SENT feedback (localStorage)
+  let drafts = {};                // per-song UNSUBMITTED work (localStorage)
   let draft = blankDraft();       // the panel's live working state
 
   function blankDraft() { return { rating: 0, moods: [], note: "" }; }
-  function storeKey() { return "mp-feedback-" + album.toLowerCase().replace(/\s+/g, "-"); }
+  function baseKey() { return "mp-feedback-" + album.toLowerCase().replace(/\s+/g, "-"); }
+  function storeKey() { return baseKey(); }
+  function draftKey() { return baseKey() + "-drafts"; }
 
   function loadSaved() {
     try { saved = JSON.parse(localStorage.getItem(storeKey()) || "{}"); }
     catch (e) { saved = {}; }
+    try { drafts = JSON.parse(localStorage.getItem(draftKey()) || "{}"); }
+    catch (e) { drafts = {}; }
   }
   function persist() {
     try { localStorage.setItem(storeKey(), JSON.stringify(saved)); } catch (e) {}
+  }
+  function persistDrafts() {
+    try { localStorage.setItem(draftKey(), JSON.stringify(drafts)); } catch (e) {}
+  }
+
+  // Keep the listener's in-progress work for the current song, so a
+  // track change (auto-advance, skip) or a page reload never erases it.
+  // Cleared only when they submit, or when they empty everything out.
+  function saveDraft() {
+    if (!currentSong) return;
+    if (draft.rating > 0 || draft.moods.length > 0 || draft.note.trim().length > 0) {
+      drafts[currentSong] = { rating: draft.rating, moods: draft.moods.slice(), note: draft.note };
+    } else {
+      delete drafts[currentSong];
+    }
+    persistDrafts();
   }
 
   function injectStyles() {
@@ -155,6 +176,7 @@ window.Feedback = (function () {
       btn.addEventListener("click", () => {
         const n = parseInt(btn.dataset.n, 10);
         draft.rating = (draft.rating === n) ? 0 : n; // click same star to clear
+        saveDraft();
         render();
       });
     });
@@ -163,12 +185,14 @@ window.Feedback = (function () {
         const m = btn.dataset.m;
         const i = draft.moods.indexOf(m);
         if (i >= 0) draft.moods.splice(i, 1); else draft.moods.push(m);
+        saveDraft();
         render();
       });
     });
     const noteEl = root.querySelector("#fb-note");
     noteEl.addEventListener("input", () => {
       draft.note = noteEl.value;
+      saveDraft();
       const send = root.querySelector("#fb-send");
       send.disabled = !hasInput();
     });
@@ -192,6 +216,8 @@ window.Feedback = (function () {
     };
     saved[currentSong] = Object.assign({}, payload, { sent: true });
     persist();
+    delete drafts[currentSong];   // work is captured; no stray draft left behind
+    persistDrafts();
     const send = root.querySelector("#fb-send");
     if (send) { send.disabled = true; send.textContent = "sending…"; }
     setStatus("");
@@ -257,10 +283,15 @@ window.Feedback = (function () {
 
   function setTrack(name) {
     currentSong = name;
-    const prior = saved[name];
-    draft = prior
-      ? { rating: prior.rating || 0, moods: (prior.moods || []).slice(), note: prior.note || "" }
-      : blankDraft();
+    const d = drafts[name];       // unsubmitted work wins — never lost on track change
+    const prior = saved[name];    // else fall back to what they last sent
+    if (d) {
+      draft = { rating: d.rating || 0, moods: (d.moods || []).slice(), note: d.note || "" };
+    } else if (prior) {
+      draft = { rating: prior.rating || 0, moods: (prior.moods || []).slice(), note: prior.note || "" };
+    } else {
+      draft = blankDraft();
+    }
     render();
   }
 
